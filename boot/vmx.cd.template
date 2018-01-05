@@ -1,0 +1,66 @@
+#!/usr/bin/vmplayer
+# Excelent information source: http://sanbarrow.com/vmx.html
+config.version = "8"
+virtualHW.version = "4"
+
+memsize = "64"
+guestOS = "other"
+
+uuid.location = "56 4d 5d 0f 5f 99 7b 6c-6c 9d 68 9f 30 f6 e3 26"
+uuid.bios = "56 4d 5d 0f 5f 99 7b 6c-6c 9d 68 9f 30 f6 e3 26"
+
+displayName = "SqueakNOS"
+
+uuid.action = "create"
+
+floppy0.present = "false"
+
+serial0.present = "true"
+serial0.fileType = "pipe"
+serial0.fileName = "serial1"
+serial0.startConnected = "true"
+serial0.yieldOnMsrRead = "true"
+serial0.tryNoRxLoss = "true"
+
+ethernet0.present = "true"
+ethernet0.startConnected = "true"
+ethernet0.virtualDev = "vlance"
+ethernet0.connectionType = "nat"
+ethernet0.generatedAddress = "00:0c:29:68:30:43"
+ethernet0.generatedAddressOffset = "0"
+ethernet0.addressType = "generated"
+
+#host.cpukHz = 1000000
+#host.noTSC = TRUE 
+#ptsc.noTSC = TRUE 
+
+# ethernet1.present = "true"
+# ethernet1.startConnected = "true"
+# ethernet1.virtualDev = "vmxnet"
+# ethernet1.connectionType = "hostonly"
+# ethernet1.generatedAddress = "00:0c:29:68:30:43"
+# ethernet1.generatedAddressOffset = "0"
+# ethernet1.addressType = "generated"
+
+# ethernet2.present = "true"
+# ethernet2.startConnected = "true"
+# ethernet2.virtualDev = "e1000"
+# ethernet2.connectionType = "hostonly"
+# ethernet2.generatedAddress = "00:0c:29:68:30:43"
+# ethernet2.generatedAddressOffset = "0"
+# ethernet2.addressType = "generated"
+
+priority.grabbed = "normal"
+priority.ungrabbed = "normal"
+
+usb.present = "true"
+usb.generic.autoconnect = "true"
+usb.generic.allowHID = "true"
+
+sound.present = "true"
+sound.autodetect = "true"
+sound.virtualDev = "es1371"
+#sound.virtualDev "sb16"
+
+ide0:0.present = "TRUE"
+ide0:0.deviceType = "cdrom-image"

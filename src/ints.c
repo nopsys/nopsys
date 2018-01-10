@@ -3,6 +3,9 @@
 #include "ints.h"
 #include "libc.h"
 
+#define PIC1_PORT 0x20
+#define PIC2_PORT 0xA0
+
 volatile ulong timer = 0;
 
 irq_semaphores_t irq_semaphores;
@@ -11,7 +14,7 @@ static idt_entry_t IDT[0x100] = { 0 };
 
 idt_descriptor_t idt_descriptor = { 0 };
 
-void isr_clock_ASM();
+void isr_0_ASM();
 void isr_1_ASM();
 void isr_2_ASM();
 void isr_3_ASM();
@@ -28,6 +31,28 @@ void isr_13_ASM();
 void isr_page_fault_ASM();
 void isr_15_ASM();
 
+void isr_clock_ASM();
+
+
+void reset_pic() {
+    outb(PIC1_PORT+0, 0x11); /* IRQs edge triggered, cascade, 8086/88 mode */
+    outb(PIC1_PORT+1, 0x20); /* int number (start) */
+    outb(PIC1_PORT+1, 0x04); /* PIC1 Master, Slave enters Int through IRQ2 */
+    outb(PIC1_PORT+1, 0x01); /* Mode 8086 */
+    outb(PIC1_PORT+1, 0xFF); /* Mask all! */
+
+    outb(PIC2_PORT+0, 0x11); /* IRQs edge triggered, cascade, 8086/88 mode */
+    outb(PIC2_PORT+1, 0x28); /* int number (start) */
+    outb(PIC2_PORT+1, 0x02); /* PIC2 Slave, enters Int through IRQ2 */
+    outb(PIC2_PORT+1, 0x01); /* Mode 8086 */
+    outb(PIC2_PORT+1, 0xFF); /* Mask all! */
+}
+
+void enable_pic() {
+    outb(PIC1_PORT+1, 0x00);
+    outb(PIC2_PORT+1, 0x00);
+}
+
 void ints_init_structs()
 {
 	for (int i = 0; i < sizeof(irq_semaphores)/sizeof(irq_semaphores[0]); i++)
@@ -37,35 +62,27 @@ void ints_init_structs()
 	for (int i = 0x0; i < 0x100; i++)
 		set_idt(i, isr_void);
 	
-	// setup master PIC handlers
-	set_idt(0x0,isr_clock_ASM);
-	set_idt(0x1,isr_1_ASM);
-	set_idt(0x2,isr_2_ASM);
-	set_idt(0x3,isr_3_ASM);
-	set_idt(0x4,isr_4_ASM);
-	set_idt(0x5,isr_5_ASM);
-	set_idt(0x6,isr_6_ASM);
-	set_idt(0x7,isr_7_ASM);
-	
-	// setup slave PIC handlers
-	set_idt(0x8,isr_8_ASM);
-	set_idt(0x9,isr_9_ASM);
-	set_idt(0xa,isr_10_ASM);
-	set_idt(0xb,isr_11_ASM);
-	set_idt(0xc,isr_12_ASM);
-	set_idt(0xd,isr_13_ASM);
-	set_idt(0xe,isr_page_fault_ASM);
-	set_idt(0xf,isr_15_ASM);
+	set_idt(0xe, isr_page_fault_ASM);
+	set_idt(0x20, isr_clock_ASM);
 
-	// init PIC and make IRQs go from 0 to 0x10
-	outb(0x20,0x11);	// 8086/88 mode, Cascade, Edge triggered
-	outb(0xa0, 0x11);	// same for seconds PIC
-	outb(0x21, 0x00);	// Offset for 1st PIC is INT 0
-	outb(0xa1, 0x08);	// Offset for 2nd PIC is INT 8
-	outb(0x21, 0x04);	// Slave is connected to IRQ2
-	outb(0xa1, 0x02);	// Slave is connected to IRQ2
-	outb(0x21, 0x01);	// 8086 Mode
-	outb(0xa1, 0x01);	// 8086 Mode
+	// set exception handlers
+	set_idt(0x0, isr_0_ASM);
+	set_idt(0x1, isr_1_ASM);
+	set_idt(0x2, isr_2_ASM);
+	set_idt(0x3, isr_3_ASM);
+	set_idt(0x4, isr_4_ASM);
+	set_idt(0x5, isr_5_ASM);
+	set_idt(0x6, isr_6_ASM);
+	set_idt(0x7, isr_7_ASM);
+	set_idt(0x8, isr_8_ASM);
+	set_idt(0x9, isr_9_ASM);
+	set_idt(0xa, isr_10_ASM);
+	set_idt(0xb, isr_11_ASM);
+	set_idt(0xc, isr_12_ASM);
+	set_idt(0xd, isr_13_ASM);
+	set_idt(0xf, isr_15_ASM);
+
+	reset_pic();
 
 	// set timer frequency
 	outb(0x43, 0x34);	// timer 0, mode binary, write 16 bits count
@@ -73,6 +90,8 @@ void ints_init_structs()
 	outb(0x40, (TIMER_DIVISOR >> 8) & 0xff);
 	outb(0x21, ~(IRQ_TIMER));
 	
+	enable_pic();
+
     idt_descriptor.addr = IDT;
     idt_descriptor.limit = sizeof(IDT) - 1;
 }
@@ -119,8 +138,8 @@ void ints_signal_slave_semaphore(int number)
 		 semaphore_signal_with_index(irq_semaphores[number]);
 	else
 	{
-		ints_slave_pic_int_ended();
-		ints_master_pic_int_ended();
+		//ints_slave_pic_int_ended();
+		//ints_master_pic_int_ended();
 	}
 }
 

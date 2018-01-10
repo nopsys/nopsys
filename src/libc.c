@@ -498,7 +498,7 @@ char* strstr(const char *s1, const char *s2)
 
 /// System call. Nobody should use system calls, but we need it to avoid
 /// libc compile errors
-int sigprocmask(int how, const __sigset_t *set, __sigset_t *oset)
+/*int sigprocmask(int how, const __sigset_t *set, __sigset_t *oset)
 {
 	return 0; // everythink OK (?)
 }
@@ -507,6 +507,7 @@ int __sigprocmask (int how, const __sigset_t *set, __sigset_t *oset)
 {
 	return sigprocmask (how, set, oset);
 }
+*/
 
 int mprotect(void *addr, size_t len, int prot)
 {

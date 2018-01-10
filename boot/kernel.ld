@@ -2,7 +2,7 @@ ENTRY (_loader)
 
 SECTIONS
 {
-    . = 0x00100000;
+    . = 0x00401000 - 0x40;
 
     .text :
     {

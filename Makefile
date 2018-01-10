@@ -38,7 +38,7 @@ distro: iso
 	cd $(BLDDIR) && zip -9 nopsys-`date +%d-%b-%Y`.zip nopsys.iso nopsys.cd.vmx
 
 clean:
-	rm -r $(BLDDIR) # -rm -rf $(BLDDIR)
+	rm -rf $(BLDDIR) # -rm -rf $(BLDDIR)
 
 .ensure_dirs:
 	mkdir -p $(BLDDIR) $(ISODIR) $(ISODIR)/boot $(DISTRODIR) $(OBJDIR)
@@ -52,8 +52,8 @@ clean:
 # object file to be loaded by grub, your dialect should have generated a vm.obj file and put in BLDDIR 
 $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kernel.ld
 	as -o $(BLDDIR)/loader.o --32 -march=i386 boot/loader.s
-	ld -o $(BLDDIR)/nopsys.kernel -m elf_i386 -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
-	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3}' > $(BLDDIR)/nopsys.sym
+	ld -o $(BLDDIR)/nopsys.kernel -m elf_i386 -T boot/kernel.ld $(BLDDIR)/loader.o $(VM_BUILDDIR)/vm.obj $(BLDDIR)/libnopsys.obj
+	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3 $$4}' > $(BLDDIR)/nopsys.sym
 
 
 

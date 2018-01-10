@@ -40,3 +40,6 @@ void semaphore_signal_with_index(int i);
 
 void debug_print_call_stack();
 
+#define BYTES_PER_LINE(width, depth)	((((width) + 31) >> 5 << 2) * (depth))
+#define BYTES_PER_LINE_RD(width, depth)	((((width) >> 5) << 2) * (depth))
+#define BYTES_PER_PIXEL(width, depth)	(width * (depth>>3))

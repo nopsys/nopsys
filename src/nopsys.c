@@ -26,16 +26,17 @@ void nopsys_main (ulong magic, multiboot_info_t *mbi)
 
 	ints_init();
 
-	if (computer->image)
+	//if (computer->image)
 	{
 		printf("Found image at %p\n", computer->image);
 		nopsys_vm_main(computer->image, computer->image_length);
 	}
-	else
+	/*else
 	{
 		printf("Image not found!!!\n");
 		nopsys_exit();
-	}		
+	}
+	*/		
 }
 
 void computer_initialize_from(computer_t *computer, ulong magic, multiboot_info_t *mbi)

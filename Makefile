@@ -1,3 +1,4 @@
+include compilation.conf
 
 NOPSYS_IMAGE   = ../dmr/bee.bsl
 NOPSYS_SOURCES = ../dmr/bee.bsc
@@ -8,8 +9,8 @@ OBJDIR    = $(BLDDIR)/objs#   temp .o files go here
 ISODIR    = $(BLDDIR)/iso#    temp dir to put everything and package as iso
 DISTRODIR = $(BLDDIR)/distro
 
-AS = /Users/guidochari/opt/cross/bin/i686-elf-as
-LD = /Users/guidochari/opt/cross/bin/i686-elf-ld
+AR = $(COMPILER_DIR)$(COMPILER_PREFIX)-ar
+LD = $(COMPILER_DIR)$(LINKER_PREFIX)
 
 -include vm.conf # '-include' doesn't fail if the file doesn't exist
 

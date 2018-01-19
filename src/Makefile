@@ -1,4 +1,4 @@
-include compilation.conf
+include ../compilation.conf
 
 AR = $(COMPILER_DIR)$(COMPILER_PREFIX)-ar
 CP = cp

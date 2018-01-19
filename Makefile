@@ -8,6 +8,9 @@ OBJDIR    = $(BLDDIR)/objs#   temp .o files go here
 ISODIR    = $(BLDDIR)/iso#    temp dir to put everything and package as iso
 DISTRODIR = $(BLDDIR)/distro
 
+AS = /Users/guidochari/opt/cross/bin/i686-elf-as
+LD = /Users/guidochari/opt/cross/bin/i686-elf-ld
+
 -include vm.conf # '-include' doesn't fail if the file doesn't exist
 
 ccred=@echo -n "\033[0;31m"
@@ -51,9 +54,9 @@ clean:
 
 # object file to be loaded by grub, your dialect should have generated a vm.obj file and put in BLDDIR 
 $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kernel.ld
-	as -o $(BLDDIR)/loader.o --32 -march=i386 boot/loader.s
-	ld -o $(BLDDIR)/nopsys.kernel -m elf_i386 -T boot/kernel.ld $(BLDDIR)/loader.o $(VM_BUILDDIR)/vm.obj $(BLDDIR)/libnopsys.obj
-	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3 $$4}' > $(BLDDIR)/nopsys.sym
+	$(AS) -o $(BLDDIR)/loader.o --32 -march=i386 boot/loader.s
+	$(LD) -o $(BLDDIR)/nopsys.kernel -m elf_i386 -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
+	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3}' > $(BLDDIR)/nopsys.sym
 
 
 

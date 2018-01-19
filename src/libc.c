@@ -1,8 +1,7 @@
-
 #include "nopsys.h"
 #include "libc.h"
-#include <time.h>  // needed?
-#include <signal.h>
+//#include <time.h>  // needed?
+//#include <signal.h>
 
 
 /** 
@@ -506,8 +505,7 @@ char* strstr(const char *s1, const char *s2)
 int __sigprocmask (int how, const __sigset_t *set, __sigset_t *oset)
 {
 	return sigprocmask (how, set, oset);
-}
-*/
+}*/
 
 int mprotect(void *addr, size_t len, int prot)
 {

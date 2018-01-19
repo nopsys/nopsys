@@ -3,8 +3,8 @@
 
 #include "multiboot.h"
 #include <stdbool.h>
-#include <stdint.h>
-#include <uchar.h>
+#include <stddef.h>
+#include "stdint.h"
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -13,6 +13,7 @@
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 typedef unsigned int  uint;
+typedef void* time_t;
 
 typedef struct display_info_t
 {

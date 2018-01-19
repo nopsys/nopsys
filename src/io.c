@@ -1,7 +1,7 @@
 
 #include "nopsys.h"
 #include "utils.h"
-#include <string.h>
+#include "libc.h"
 
 
 
@@ -111,6 +111,3 @@ void computer_shutdown()
 	__asm("mov 0x3, %cx"); // power mode: shutdown
 	__asm("int $0x15"); // call the BIOS function throu
 }
-
-
-

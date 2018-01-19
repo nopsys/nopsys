@@ -2,7 +2,7 @@
 export VM_BUILDDIR=example-nopsys
 
 vm:
-	nasm -o vm.obj -f elf32 nopsys.asm
+	nasm -o vm.obj -f elf nopsys.asm
 
 iso: vm
 	make -C .. iso

@@ -99,7 +99,7 @@ void serial_write_string(char *string)
 
 void serial_enter_debug_mode()
 {
-	printf("Waiting for debug commands via serial port.\n",1);
+	printf("Waiting for debug commands via serial port.\n");
 	printf("Write an address and I'll tell you its value.");
 	printf("Do\n$ grep var_name nopsys.sym in bash to get var_name address in memory of any VM var\n");
 	

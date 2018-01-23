@@ -3,7 +3,6 @@
 
 #include "nopsys.h"
 
-int printf(const char *format, ...);
 int printf_tab(const char *format, ...);
 int printf_tab_with(int tabs_local, const char *format, ...);
 

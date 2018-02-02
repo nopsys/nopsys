@@ -1,7 +1,8 @@
 
 #include "nopsys.h"
 #include "ints.h"
-#include "libc.h"
+#include "stdio.h"
+#include "stdbool.h"
 
 computer_t computer;
 

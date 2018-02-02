@@ -2,7 +2,7 @@
 #ifndef _STDDEF_H_
 #define _STDDEF_H_
 
-// placeholder file in case stdlib stddef.h is included
+#define offsetof(st, m) ((size_t)&(((st *)0)->m))
 
 #endif  // _STDDEF_H_
 

@@ -1,5 +1,6 @@
 
-#include "libc.h"
+#include "stdio.h"
+#include "string.h"
 #include "multiboot.h"
 #include "ints.h"
 #include "console.h"

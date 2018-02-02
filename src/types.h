@@ -2,8 +2,8 @@
 #define _NOS_TYPES_H_
 
 #include "multiboot.h"
-#include <stdbool.h>
-#include <stddef.h>
+#include "stdbool.h"
+#include "stddef.h"
 #include "stdint.h"
 
 #ifndef NULL

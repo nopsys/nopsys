@@ -7,7 +7,7 @@
 #define ActiveProcessIndex 1
 #include "nopsys.h"
 #include "ints.h"
-#include "libc.h"
+#include "stdio.h"
 
 /**
  *  Basic stuff related to memory management (paging)

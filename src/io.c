@@ -1,7 +1,8 @@
 
 #include "nopsys.h"
 #include "utils.h"
-#include "libc.h"
+#include "stdio.h"
+#include "string.h"
 
 
 

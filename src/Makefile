@@ -9,6 +9,7 @@ CC = $(COMPILER_DIR)$(COMPILER_PREFIX)
 CFLAGS = -std=c11 -m32 -Wall --no-pie -nostdlib -fno-stack-protector -g -O1 -fno-inline
 LDFLAGS = -melf_i386 -static -nostdlib -r #-lm -Xlinker -r
 DEFS  = -DNO_STD_FILE_SUPPORT -DDEBUG -DLSB_FIRST -DX86
+INCS = -Ilibc
 
 BLDDIR  = ../build
 OBJDIR  = $(BLDDIR)/objs

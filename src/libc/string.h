@@ -2,7 +2,7 @@
 #ifndef _STRING_H_
 #define _STRING_H_
 
-#include "types.h"
+#include "../types.h"
 
 void* memcpy(void *dst, const void *src, size_t n);
 void* memset(void *s, int c, size_t n);

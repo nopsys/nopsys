@@ -2,7 +2,7 @@
 #include "nopsys.h"
 #include "console.h"
 #include "fonttex.h"
-#include "libc.h"
+#include "string.h"
 
 /**
  * Activate this if you wan't to directly draw to the framebuffer, like

@@ -1,5 +1,5 @@
 #include "nopsys.h"
-#include "libc.h"
+#include "stdio.h"
 //#include <time.h>  // needed?
 //#include <signal.h>
 
@@ -22,9 +22,6 @@
 #define LINES                   24       // The number of lines
 #define ATTRIBUTE               7        // The attribute of an character
 #define VIDEO                   0xB8000  // The video memory address
-
-
-#define FILE uint32_t  //ugh
 
 
 // These two are globals declared as extern in some place of libc headers. We

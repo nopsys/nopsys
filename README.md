@@ -1,7 +1,7 @@
 # Nopsys
 No Operating System Project: Seeking Dan Ingalls' quote: 'Operating Systems should not exist'
 
-# Rationale
+## Rationale
 This project is a third iteration of the orginal SqueakNOS project born at early 2000's. SqueakNOS had two previous stages. 
 At a first stage, [Gerardo Richarte](...) (Richie) and [Luciano Notarfrancesco](https://github.com/len?tab=activity) depicted the fundamentals of the project 
 and built its basis. Most of the code contained in this and related repositories was developed by them. 
@@ -17,7 +17,7 @@ Smalltalk, and we considered ourselves Smalltalkers, actually the fundamental id
 ## Publications
 We are working on them. Nothing serious yet :). Hope to have news soon.
 
-# Code structure
+## Code structure
 
 In this new iteration, platform code has been modularized. This repo contains _nopsys_, a set of language-agnostic platform files. Aditionally, you will find under the nopsys project umbrella different implementations using different languages or VM implementations (CogNOS, BeeNOS, PyNOS, etc). 
 
@@ -34,9 +34,9 @@ yournos
  / Makefile  - compiles your src into vm.obj and recursivelly calls nopsys make iso, providing the path to vm.obj
 
 
-# Documentation
+## Documentation
 
-# Goals for this new version of Nopsys
+## Goals for this new version of Nopsys
 - [ ] Make Nopsys work with the new family of Open-Smalltalk VMs (Stack, Cog, Spur) and with the up to date images 
 (Pharo, Squeak, Cuis). 
 - [ ] ... 

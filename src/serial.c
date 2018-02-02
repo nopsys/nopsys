@@ -1,5 +1,5 @@
 #include "nopsys.h"
-#include "libc.h"
+#include "stdio.h"
 
 /**
  *  This is a C driver for Serial port. We use it for debugging and

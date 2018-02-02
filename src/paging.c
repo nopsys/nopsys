@@ -8,6 +8,7 @@
 #include "nopsys.h"
 #include "ints.h"
 #include "stdio.h"
+#include "libc.h"
 
 /**
  *  Basic stuff related to memory management (paging)

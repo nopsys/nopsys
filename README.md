@@ -28,10 +28,11 @@ This nopsys repo contains a minimal grub, a few C files for life support and a m
  
 To give an example, for creating yourNOS, you would need something like the following file structure:
 
-yournos 
- / src       - your NOS files
- / nopsys    - nopsys git submodule
- / Makefile  - compiles your src into vm.obj and recursivelly calls nopsys make iso, providing the path to vm.obj
+     yournos 
+     / src       - your NOS files
+     / nopsys    - nopsys git submodule
+     / Makefile  - compiles your src into vm.obj and recursivelly calls
+                   nopsys make iso, providing the path to vm.obj
 
 
 ## Documentation

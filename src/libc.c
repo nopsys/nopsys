@@ -27,8 +27,8 @@
 // These two are globals declared as extern in some place of libc headers. We
 // have to define them to avoid link errors.
 
-int errno;
-int *__errno_location = &errno;
+__thread int errno;
+
 
 __thread int __libc_errno;
 
@@ -190,16 +190,18 @@ int putchar (int c)
 }
 
 
-void bprintf_string(const char *str)
+const char* putstring(const char *str)
 {
 	while (*str)
 		putchar (*str++);
+
+	return str;
 }
 
 /* Format a string and print it on the screen, just like the libc
    function printf.  */
 int
-bprintf (const char *format, void *arg[])
+sprintf_args (char *formatted, const char *format, void *arg[])
 {
 	int c;
 	char buf[20];
@@ -208,7 +210,7 @@ bprintf (const char *format, void *arg[])
 	{
 		if (c != '%')
 		{
-			putchar (c);
+			*formatted++ = c;
 		}
 		else
 		{
@@ -221,25 +223,25 @@ bprintf (const char *format, void *arg[])
 			switch (c)
 			{
 			case 'p':
-				putchar('0');
-				putchar('x');
+				*formatted++ = '0';
+				*formatted++ = 'x';
 				uitoa ((int)value, buf, 16);
-				bprintf_string(buf);
+				formatted = (char*)putstring(buf);
 				break;
 
 			case 'x':
 				uitoa ((int)value, buf, 16);
-				bprintf_string(buf);
+				formatted = (char*)putstring(buf);
 				break;
 
 			case 'u':
 				uitoa ((int)value, buf, 10);
-				bprintf_string(buf);
+				formatted = (char*)putstring(buf);
 				break;
 
 			case 'd':
 				itoa ((int)value, buf, 10);
-				bprintf_string(buf);
+				formatted = (char*)putstring(buf);
 				break;
 
 			case 's':
@@ -247,13 +249,13 @@ bprintf (const char *format, void *arg[])
 				if (!p)
 					p = "(null)";
 
-				bprintf_string(p);
+				formatted = (char*)putstring(p);
 				break;
 					
 
 			default:
-				bprintf_string("<unkonwn format>");
-				putchar (*((int *) arg++));
+				formatted = (char*)putstring("<unkonwn format>");
+				*formatted++ = (*((int *) arg++));
 				break;
 			}
 		}
@@ -262,12 +264,27 @@ bprintf (const char *format, void *arg[])
 	return 0; // should return num of chars written
 }
 
+int printf_args(const char *format, void *arg[])
+{
+	char formatted[10000];
+
+	sprintf_args(formatted, format, arg + 1);
+	putstring(formatted);
+	return 0;
+}
 
 int printf (const char *format, ...)
 {
 	void **arg = (void **) &format;
-	return bprintf(format, arg + 1);
+	return printf_args(format, arg + 1);
 }
+
+int sprintf (char *formatted, const char *format, ...)
+{
+	void **arg = (void **) &format;
+	return sprintf_args(formatted, format, arg + 1);
+}
+
 
 int printf_fixed_size(const char *string, const long size)
 {
@@ -292,7 +309,7 @@ int printf_tab(const char *format, ...)
 	}
 
 	void **arg = (void **) &format;
-	return bprintf(format, arg +1);
+	return printf_args(format, arg +1);
 }
 
 int printf_tab_with (int tabs_local, const char *format, ...)
@@ -302,24 +319,31 @@ int printf_tab_with (int tabs_local, const char *format, ...)
 		printf("\t");
 	}
 	void **arg = (void **) &format;
-	return bprintf(format, arg +1);
+	return printf_args(format, arg + 1);
 }
 
 
 int puts(const char *msg)
 {
-	bprintf("%s\n", (void**)&msg);
+	putstring(msg);
 	return 0;
 }
 
+FILE *stdin  = (FILE *) 0;
+FILE *stdout = (FILE *)-1;
 FILE *stderr = (FILE *)-2;
+
+FILE* fopen (const char * filename, const char * mode)
+{
+	perror("opening files is not unsupported");
+}
 
 int fprintf(FILE *file, const char *format, ...)
 {
 	void **arg = (void **) &format;
 
 	if (file == stderr) 
-		return bprintf(format, arg+1);
+		return printf_args(format, arg+1);
 	
 	printf("fprintf called with file %p.\n", file);
 	return EOF;
@@ -349,6 +373,16 @@ size_t fwrite(const void *buf, size_t size, size_t nmemb, FILE *file)
 	else printf("fwrite called with file %p.\n", file);
 
 	return size;
+}
+
+int fflush (FILE *f)
+{
+	return 0;
+}
+
+int fileno(FILE *f)
+{
+	return (int)f;
 }
 
 int getchar(void)
@@ -412,6 +446,40 @@ int memcmp (const void *s1, const void *s2, size_t len)
 	return *sp1 - *sp2;
 }
 
+#define WT size_t
+#define WS (sizeof(WT))
+
+// TAKEN FROM LIBMUSL
+void *memmove(void *dest, const void *src, size_t n)
+{
+	char *d = dest;
+	const char *s = src;
+
+	if (d==s) return d;
+	if (s+n <= d || d+n <= s) return memcpy(d, s, n);
+
+	if (d<s) {
+		if ((uint)s % WS == (uint)d % WS) {
+			while ((uint)d % WS) {
+				if (!n--) return dest;
+				*d++ = *s++;
+			}
+			for (; n>=WS; n-=WS, d+=WS, s+=WS) *(WT *)d = *(WT *)s;
+		}
+		for (; n; n--) *d++ = *s++;
+	} else {
+		if ((uint)s % WS == (uint)d % WS) {
+			while ((uint)(d+n) % WS) {
+				if (!n--) return dest;
+				d[n] = s[n];
+			}
+			while (n>=WS) n-=WS, *(WT *)(d+n) = *(WT *)(s+n);
+		}
+		while (n) n--, d[n] = s[n];
+	}
+
+	return dest;
+}
 
 int strlen(const char *s)
 {
@@ -438,6 +506,24 @@ char* strcpy (char *dest, const char *src)
 	return dest;
 }
 
+// FIXME: untested
+char* strncpy (char *dest, const char *src, size_t n)
+{
+	char *p = dest;
+	while (*src != 0 && n > 0)
+	{
+		*p++ = *src++;
+		n--;
+	}
+	
+	while (n > 0)
+	{
+		*p = 0;
+		n--;
+	}
+
+	return dest;
+}
 
 int strcmp (const char *s1, const char *s2)
 {

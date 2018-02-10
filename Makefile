@@ -73,6 +73,7 @@ $(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel
 $(VM_BUILDDIR)/vm.obj:
 	@echo "------------"
 	$(ccred)
+	@echo "$@ not found in $(shell pwd)...\n"
 	@echo "for your dialect you should have generated a vm.obj file. That file includes"
 	@echo "your vm and the entrypoint 'nopsys_vm_main(image_bytes, image_size)'."
 	@echo "This makefile can then try to link everything, without caring which"

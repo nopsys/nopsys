@@ -329,6 +329,13 @@ int puts(const char *msg)
 	return 0;
 }
 
+int close(int fildes)
+{
+	perror("close unimplemented");
+	return 0;
+}
+
+
 FILE *stdin  = (FILE *) 0;
 FILE *stdout = (FILE *)-1;
 FILE *stderr = (FILE *)-2;
@@ -336,6 +343,7 @@ FILE *stderr = (FILE *)-2;
 FILE* fopen (const char * filename, const char * mode)
 {
 	perror("opening files is not unsupported");
+	return NULL;
 }
 
 int fprintf(FILE *file, const char *format, ...)
@@ -599,7 +607,28 @@ void perror(const char *s)
 {
 	// FIXME: Should print also errno and a corresponding message
 	if (s)
-		printf("%s", s);
+		printf("%s\n", s);
+	while (true) {}
 }
+
+struct tm * localtime (const time_t * timer)
+{
+	perror("localtime unimplemented");
+	return NULL;
+}
+
+char* asctime (const struct tm * timeptr)
+{
+	perror("asctime unimplemented");
+	return NULL;
+}
+
+char* getenv (const char* name)
+{
+	return 0;
+}
+
+
+
 
 

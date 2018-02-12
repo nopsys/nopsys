@@ -15,8 +15,8 @@ void display_render(uchar   *image_src, uint32_t width, uint32_t height, uint32_
 	uchar *image_dst = display->address;
 	uint scan_line = display->bytes_per_scanline;
 
-	first_word = scan_line * affectedT + BYTES_PER_LINE_RD(affectedL, depth);
-	last_word  = scan_line * affectedT + BYTES_PER_LINE(affectedR, depth);
+	first_word = scan_line * affectedT + BYTES_PER_LINE_FLOOR(affectedL, depth);
+	last_word  = scan_line * affectedT + BYTES_PER_LINE_PADDED(affectedR, depth);
 	count_per_line = last_word - first_word;
 
 	switch (display->depth)
@@ -80,7 +80,7 @@ void display_initialize_from_cmd(display_info_t *video_info, char *video_config_
 	if (video_config_line)
 		parse_string(video_config_line, &video_info->bytes_per_scanline, sep_tokens[4]);
 	else
-		video_info->bytes_per_scanline = BYTES_PER_LINE(video_info->width, video_info->depth);
+		video_info->bytes_per_scanline = BYTES_PER_LINE_PADDED(video_info->width, video_info->depth);
 }
 
 void connect_to_APM()

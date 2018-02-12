@@ -89,7 +89,8 @@ void set_table_read_write(unsigned int *pageTable, int firstIndex, int lastIndex
 	
 }
 
-void make_read_only(ulong from, ulong to){
+void make_read_only(ulong from, ulong to)
+{
 	printf_tab("Read only from: %d to: %d\n",from,to);
 	unsigned int *pageDirectory;
 
@@ -120,7 +121,8 @@ void make_read_only(ulong from, ulong to){
 	
 }
 
-void make_read_write(){
+void make_read_write()
+{
 	unsigned int *pageDirectory;
 
 	__asm volatile("movl %%cr3, %0": "=a" (pageDirectory));
@@ -156,7 +158,7 @@ void enable_paging_in_hardware()
 	unsigned int cr0;
 	long *pd = page_directory();
 	
-	__asm volatile("xchg %%bx, %%bx" ::: "ebx");
+	breakpoint();
 	
 	//moves pd (which is a pointer) into the cr3 register.
 	__asm volatile("mov %0, %%cr3":: "b"(pd));
@@ -184,7 +186,8 @@ void paging_handle_fault(uint32_t error_code)
 {
 /* ////// 	if ((error_code & 1) == 1) // Protection page fault
 	{
-		if ((computer->in_page_fault > 1) || (computer->in_gc)){
+		if ((computer->in_page_fault > 1) || (computer->in_gc))
+{
 			printf_tab("PageFaultISR: Manually saved pages: %d of %d \n",computer->snapshot.pagesSaved,computer->snapshot.pagesToSave);
 			printf_tab("PageFaultISR: Entered native page-fault for: %d\n",virtual_address_failure);
 ///////			saveSnapshotPage(virtual_address_failure);

@@ -1,7 +1,8 @@
 
 #include "types.h"
 
-#define breakpoint_bochs() __asm("xchg %bx, %bx");
+#define breakpoint() __asm("xchg %bx, %bx");
+//#define breakpoint() __asm volatile("xchg %%bx, %%bx" ::: "ebx");  // or use this? which is best?
 
 int  nopsys_vm_main(void *image, uint image_length);
 __attribute__ ((noreturn)) void nopsys_exit();
@@ -40,8 +41,8 @@ void semaphore_signal_with_index(int i);
 
 void debug_print_call_stack();
 
-#define BYTES_PER_LINE(width, depth)	((((width) + 31) >> 5 << 2) * (depth))
-#define BYTES_PER_LINE_RD(width, depth)	((((width) >> 5) << 2) * (depth))
+#define BYTES_PER_LINE_PADDED(width, depth)	((((width) + 31) >> 5 << 2) * (depth))
+#define BYTES_PER_LINE_FLOOR(width, depth)	((((width) >> 5) << 2) * (depth))
 #define BYTES_PER_PIXEL(width, depth)	(width * (depth>>3))
 
 

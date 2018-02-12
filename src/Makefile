@@ -13,6 +13,7 @@ INCS = -Ilibc
 
 BLDDIR  = ../build
 OBJDIR  = $(BLDDIR)/objs
+
 VMSRC   = $(wildcard *.c *.asm)
 VMOBJS1  = $(VMSRC:.c=.o)
 VMOBJS  = $(VMOBJS1:.asm=.o)

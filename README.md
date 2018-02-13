@@ -42,3 +42,9 @@ To give an example, for creating yourNOS, you would need something like the foll
 (Pharo, Squeak, Cuis). 
 - [ ] ... 
 
+Build Status
+------------
+
+Thanks to Travis CI, all commits of this repository are tested.
+The current build status is: [![Build Status](
+https://travis-ci.org/nopsys/nopsys.png)](https://travis-ci.org/nopsys/nopsys)

@@ -198,6 +198,14 @@ const char* putstring(const char *str)
 	return str;
 }
 
+static char* copy_buf(char **pformatted, const char *buf)
+{
+	char *formatted = *pformatted;
+	int len = strlen(buf);
+	memcpy(formatted, buf, len);
+	*pformatted = formatted + len;
+}
+
 /* Format a string and print it on the screen, just like the libc
    function printf.  */
 int
@@ -226,22 +234,22 @@ sprintf_args (char *formatted, const char *format, void *arg[])
 				*formatted++ = '0';
 				*formatted++ = 'x';
 				uitoa ((int)value, buf, 16);
-				formatted = (char*)putstring(buf);
+				copy_buf(&formatted, buf);
 				break;
 
 			case 'x':
 				uitoa ((int)value, buf, 16);
-				formatted = (char*)putstring(buf);
+				copy_buf(&formatted, buf);
 				break;
 
 			case 'u':
 				uitoa ((int)value, buf, 10);
-				formatted = (char*)putstring(buf);
+				copy_buf(&formatted, buf);
 				break;
 
 			case 'd':
 				itoa ((int)value, buf, 10);
-				formatted = (char*)putstring(buf);
+				copy_buf(&formatted, buf);
 				break;
 
 			case 's':
@@ -249,13 +257,18 @@ sprintf_args (char *formatted, const char *format, void *arg[])
 				if (!p)
 					p = "(null)";
 
-				formatted = (char*)putstring(p);
+				copy_buf(&formatted, p);
 				break;
+
+			case 'l': //operand size unsupported
+				break; 
 					
 
 			default:
-				formatted = (char*)putstring("<unkonwn format>");
-				*formatted++ = (*((int *) arg++));
+				copy_buf(&formatted, "<unkonwn format %");
+				buf [0] = c; buf[1] = '>'; buf[2] = 0;
+				copy_buf(&formatted, buf);
+				arg++; // discard the argument
 				break;
 			}
 		}

@@ -24,13 +24,12 @@
 #define VIDEO                   0xB8000  // The video memory address
 
 
-// These two are globals declared as extern in some place of libc headers. We
-// have to define them to avoid link errors.
-
+/* These are globals declared as extern in some place of libc headers. We
+   have to define them to avoid link errors. */
 __thread int errno;
-
-
 __thread int __libc_errno;
+/* Needed in some libm.a implementations */
+int __errno_location;
 
 __attribute__ ((noreturn)) 
 void exit(int a) 
@@ -344,12 +343,17 @@ int puts(const char *msg)
 	return 0;
 }
 
+/* Linux implementations use close while others use fclose */
 int close(int fildes)
 {
 	perror("close unimplemented");
-	return 0;
+    return 0;
 }
-
+ 
+int fclose(int fildes)
+{
+	return close(fileno(fildes));
+}
 
 FILE *stdin  = (FILE *) 0;
 FILE *stdout = (FILE *)-1;

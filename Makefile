@@ -33,7 +33,15 @@ try-vmware: iso %.$(TARGET).vmx
 #	vmware-server-console -m -x -l "`pwd`/$<"
 #	make clean
 
-iso: $(BLDDIR)/nopsys.iso $(BLDDIR)/nopsys.cd.vmx
+iso: $(BLDDIR)/nopsys.iso
+
+virtualBox: $(BLDDIR)/nopsys.iso
+	build/distro/virtualBox.sh
+	
+vmware: boot/vmx.cd.template
+	cp boot/vmx.cd.template $@
+	chmod +x $@
+	echo 'ide0:0.fileName = "$*.iso"' >> $@
 
 # generate a zip with all the current files, that can both be used to run or rebuild this nopsys
 distro: iso
@@ -91,12 +99,6 @@ $(VM_BUILDDIR)/vm.obj:
 	sudo umount $(mnt)
 	rmdir $(mnt)
 	mv $(img) $@
-
-
-$(BLDDIR)/%.cd.vmx: boot/vmx.cd.template
-	cp boot/vmx.cd.template $@
-	chmod +x $@
-	echo 'ide0:0.fileName = "$*.iso"' >> $@
 
 
 

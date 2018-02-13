@@ -3,13 +3,13 @@ No Operating System Project: Seeking Dan Ingalls' quote: 'Operating Systems shou
 
 ## Rationale
 This project is a third iteration of the orginal SqueakNOS project born at early 2000's. SqueakNOS had two previous stages. 
-At a first stage, [Gerardo Richarte](...) (Richie) and [Luciano Notarfrancesco](https://github.com/len?tab=activity) depicted the fundamentals of the project 
+At a first stage, [Gerardo Richarte]() (Richie) and [Luciano Notarfrancesco]() depicted the fundamentals of the project 
 and built its basis. Most of the code contained in this and related repositories was developed by them. 
 The sources of that stage of the project can be found at: https://sourceforge.net/projects/squeaknos/.
 
-In a second stage, during 2011-2012, [Javier Pimás](https://github.com/melkyades) and [Guido Chari](https://github.com/charig), in collaboration with Richie revived the project, made it compatible with Pharo Smalltalk and added Filesystem (FAT32) and Memory Management (Paging) support. This made it possible to snapshot images, an important milestone of the project. There is a blog with some documentation, the news of those days, and instructions to download prebuilt images: http://squeaknos.blogspot.com.ar/.
+In a second stage, during 2011-2012, [Javier Pimás](https://github.com/melkyades) and [Guido Chari](https://github.com/charig), in collaboration with Richie revived the project and made it compatible with Pharo Smalltalk. In addition, we added Filesystem (FAT32) and Memory Management (paging) support. This made it possible to snapshot images, an important milestone of the project. There is a blog with some documentation, the news of those days, and instructions to download prebuilt images: http://squeaknos.blogspot.com.ar/.
 
-Now, we are working in a second revival! Smalltalk VMs (and also the images) have changed a lot since the old times. 
+Now, we are working in a second revival! Smalltalk VMs (and also images) have changed a lot since the old times. 
 We have decided to give a new name to the project: Nopsys (No Operating System). The reason is that we do not want the 
 project to be tightly coupled to any particular Smalltalk dialect. Besides, although we are developing the project in 
 Smalltalk, and we considered ourselves Smalltalkers, actually the fundamental ideas are language-agnostic. 
@@ -34,8 +34,12 @@ To give an example, for creating yourNOS, you would need something like the foll
      / Makefile  - compiles your src into vm.obj and recursivelly calls
                    nopsys make iso, providing the path to vm.obj
 
+## Current (No) Operating Systems using Nopsys:
+ * [CogNOS](https://github.com/nopsys/CogNOS): A Cog (Spur) Pharo Smalltalk.
+
 
 ## Documentation
+We are currently working on providing proper documentation for developers.
 
 ## Goals for this new version of Nopsys
 - [ ] Make Nopsys work with the new family of Open-Smalltalk VMs (Stack, Cog, Spur) and with the up to date images 

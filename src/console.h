@@ -11,9 +11,12 @@ typedef struct text_pen_t
 	int positionX;
 	int positionY;
 	
-	int width;
+	int line_width;
 	int glyph_width;
 	int glyph_height;
+
+	int char_separation_x;
+	int char_separation_y;
 
 	display_info_t *display;
 	
@@ -26,6 +29,9 @@ typedef struct console_t
 	
 	int width;
 	int height;
+
+	int char_separation_x;
+	int char_separation_y;
 	
 	char text[CONSOLE_TEXT_BUFFER_SIZE];
 	int text_size;

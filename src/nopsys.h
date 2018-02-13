@@ -29,7 +29,7 @@ void bitblt_32bit_to_fb(display_info_t *display, uint32_t *bitmap, int width, in
 
 void console_initialize_stdout();
 void console_set_debugging(bool debugging);
-void console_std_put_string(char string[]);
+void console_std_put_string(const char string[]);
 void console_std_put_char(char c);
 
 

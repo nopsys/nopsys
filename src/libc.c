@@ -190,12 +190,12 @@ int putchar (int c)
 }
 
 
-const char* putstring(const char *str)
+void putstring(const char *str)
 {
+	console_std_put_string(str);
 	while (*str)
-		putchar (*str++);
+		serial_write(*str++);
 
-	return str;
 }
 
 static char* copy_buf(char **pformatted, const char *buf)
@@ -274,6 +274,7 @@ sprintf_args (char *formatted, const char *format, void *arg[])
 		}
 	}
 
+	*formatted = 0;
 	return 0; // should return num of chars written
 }
 
@@ -338,7 +339,8 @@ int printf_tab_with (int tabs_local, const char *format, ...)
 
 int puts(const char *msg)
 {
-	putstring(msg);
+	putstring(msg); 
+	putchar('\n');
 	return 0;
 }
 

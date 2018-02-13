@@ -17,19 +17,22 @@ console_t console;
 #define CON_COLOR_GREEN   0x0000FF00
 #define CON_COLOR_BLUE    0x000000FF
 #define CON_COLOR_WHITE   0x00FFFFFF
+#define CON_COLOR_BLACK   0x00000000
 
-
-void text_pen_initialize( text_pen_t *pen, int glyph_width, int glyph_height, int rect_width)
+void text_pen_initialize( text_pen_t *pen, console_t *console)
 {
-	pen->positionX    = 0;
-	pen->positionY    = glyph_height;
+	pen->positionX         = 0;
+	pen->positionY         = console->glyph_height;
 	
-	pen->width        = rect_width;
+	pen->char_separation_x = console->char_separation_x;
+	pen->char_separation_y = console->char_separation_y;
 	
-	pen->glyph_width  = glyph_width;
-	pen->glyph_height = glyph_height;
+	pen->glyph_width       = console->glyph_width;
+	pen->glyph_height      = console->glyph_height;
 
-	pen->display      = &current_computer()->video_info;
+	pen->line_width        = console->width;
+
+	pen->display           = &current_computer()->video_info;
 }
 
 void text_pen_carriage_return(text_pen_t *pen)
@@ -38,14 +41,19 @@ void text_pen_carriage_return(text_pen_t *pen)
 	pen->positionY += pen->glyph_height;
 }
 
+int  text_pen_line_height(text_pen_t *pen)
+{
+	return pen->glyph_height + pen->char_separation_y;
+}
+
 void text_pen_advance_one_char(text_pen_t *pen)
 {
-	pen->positionX += (pen->glyph_width + 1);
+	pen->positionX += (pen->glyph_width + pen->char_separation_x);
 }
 
 void text_pen_advance_n_chars(text_pen_t *pen, int n)
 {
-	pen->positionX = (pen->glyph_width + 1) * n;
+	pen->positionX = (pen->glyph_width + pen->char_separation_x) * n;
 }
 
 int text_pen_tab_space(text_pen_t *pen)
@@ -53,9 +61,10 @@ int text_pen_tab_space(text_pen_t *pen)
 	return 4 - ((pen->positionX/pen->glyph_width) % 4);
 }
 
+
 void text_pen_correct_margin_if_necessary(text_pen_t *pen)
 {
-	if (pen->positionX + pen->glyph_width > pen->width)
+	if (pen->positionX + pen->glyph_width > pen->line_width)
 		text_pen_carriage_return(pen);
 }
 
@@ -80,42 +89,44 @@ void text_pen_advance_char(text_pen_t *pen, unsigned char nextChar)
 
 int text_pen_collected_height(text_pen_t *pen)
 {
-	return pen->positionY - (pen->positionX == 0 ? pen->glyph_height : 0);
+	return pen->positionY + pen->char_separation_y;
 }
 
 
-void font_draw_char(text_pen_t *pen, char character)
+void text_pen_draw_char(text_pen_t *pen, char character)
 {
 	if (character == '\t')
 	{
 		int tab_space = text_pen_tab_space(pen);
 		for (int i = 0; i < tab_space; i++)
-			font_draw_char(pen, ' ');
+			text_pen_draw_char(pen, ' ');
 		return;
-	}
-	else if (character != ' ')
-	{
-		fill_rectangle(pen->display, pen->glyph_width, pen->glyph_height, pen->positionX, pen->positionY, 0);
 	}
 	else if (character < 32)
 	{	
 		return;
 	}
-		
+	else if (character > 126)
+	{
+		breakpoint();
+	}
+
 	bitblt_32bit_to_fb(pen->display, rasters[character-32], pen->glyph_width, pen->glyph_height, pen->positionX, pen->positionY, CON_COLOR_GREEN);
-	fill_rectangle(pen->display, 1, FONT_GLYPH_HEIGHT, pen->positionX+FONT_GLYPH_WIDTH, pen->positionY, 0x00000000); // space between characters
+	
+	// draw separation between next character
+	fill_rectangle(pen->display, pen->char_separation_x, pen->glyph_height, pen->positionX+pen->glyph_width, pen->positionY, CON_COLOR_BLACK); 
 }
 
 
 void putc_at_pos(char character, int x, int y)
 {
 	text_pen_t pen;
-	text_pen_initialize(&pen, console.glyph_width, console.glyph_height, console.width);
+	text_pen_initialize(&pen, &console);
 
 	pen.positionX = x;
 	pen.positionY = y;
  
-	font_draw_char(&pen, character); 
+	text_pen_draw_char(&pen, character); 
 }
 
 void putc_debug(char character)
@@ -128,8 +139,10 @@ void putc_debug(char character)
 
 void console_initialize(console_t *console, int width, int height)
 {
-	console->glyph_width = 8;
-	console->glyph_height = 16;
+	console->glyph_width = FONT_GLYPH_WIDTH;
+	console->glyph_height = FONT_GLYPH_HEIGHT;
+	console->char_separation_x = 1;
+	console->char_separation_y = 3;
 	
 	console->width = width;
 	console->height = height;
@@ -156,11 +169,12 @@ void console_set_debugging(bool debugging)
 	console.debugging_now = debugging;
 }
 
-void console_fill_remaining_with_background(console_t *console, int left, int top)
+void console_fill_remaining_line_with_background(console_t *console, int left, int top)
 {
 	display_info_t *display = &current_computer()->video_info;
-	fill_rectangle(display, console->width - left, FONT_GLYPH_HEIGHT, left, top, 0x00000000);
-	fill_rectangle(display, console->width, console->glyph_height - FONT_GLYPH_HEIGHT, 0 , top + console->glyph_height - FONT_GLYPH_HEIGHT, 0);
+	fill_rectangle(display, console->width - left, console->glyph_height, left, top, 0x00000000);
+//	fill_rectangle(display, console->width, console->glyph_height - FONT_GLYPH_HEIGHT, 0 , top + console->glyph_height - FONT_GLYPH_HEIGHT, 0);
+
 }
 
 void console_draw_string(console_t *console, char *string)
@@ -169,23 +183,24 @@ void console_draw_string(console_t *console, char *string)
 		return;
 		
 	text_pen_t pen;
-	text_pen_initialize(&pen, console->glyph_width, console->glyph_height, console->width);
+	text_pen_initialize(&pen, console);
 	
 	while (*string != 0)
 	{
-		font_draw_char(&pen, *string);
+		text_pen_draw_char(&pen, *string);
 		if (*string == '\n')
-			console_fill_remaining_with_background(console, pen.positionX, pen.positionY);
+			console_fill_remaining_line_with_background(console, pen.positionX, pen.positionY);
+
 		text_pen_advance_char(&pen, *string);
 		string++;
 	}
 }
 
-// 
+// remember that one text line can span over many lines in the display
 int console_calc_height_of_line(console_t *console, char *line_start)
 {
 	text_pen_t pen;
-	text_pen_initialize(&pen, console->glyph_width, console->glyph_height, console->width);
+	text_pen_initialize(&pen, console);
 			
 	while (*line_start != 0 && *line_start != '\n')
 	{
@@ -271,7 +286,7 @@ void console_draw(console_t *console)
 	console_draw_string(console, text_start);
 }
 
-void console_push_string(console_t *console, char string[])
+void console_append_string(console_t *console, const char string[])
 {
 	//printf("viewing len...\n");
 	int len = strlen(string);
@@ -284,21 +299,22 @@ void console_push_string(console_t *console, char string[])
 	//printf("copied...\n");
 	
 	console->text_size += len;
-	
-	console->text[console->text_size] = 0; //just in case strcpy didn't do it.
 }
 
-void console_std_put_string(char string[])
+void console_std_put_string(const char string[])
 {
-	console_push_string(&console, string);
+	if (*string == 'W') 
+		breakpoint();
+
+	console_append_string(&console, string);
 	console_draw(&console);
 	
 }
 
 void console_std_put_char(char c)
 {
+	//breakpoint();
 	char str[2] = { c, 0 };
-	console_push_string(&console, str);
-	console_draw(&console);
+	console_std_put_string(str);
 	
 }

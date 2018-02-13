@@ -1,7 +1,7 @@
 language: c
 
 before_install:
-  - sudo apt-get nasm
+  - sudo apt-get install nasm
 
 before_script: cp compilation.conf.example compilation.conf
 

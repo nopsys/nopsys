@@ -13,10 +13,10 @@
 
 console_t console;
 
-#define COLOR_RED     0x00FF0000
-#define COLOR_GREEN   0x0000FF00
-#define COLOR_BLUE    0x000000FF
-#define COLOR_WHITE   0x00FFFFFF
+#define CON_COLOR_RED     0x00FF0000
+#define CON_COLOR_GREEN   0x0000FF00
+#define CON_COLOR_BLUE    0x000000FF
+#define CON_COLOR_WHITE   0x00FFFFFF
 
 
 void text_pen_initialize( text_pen_t *pen, int glyph_width, int glyph_height, int rect_width)
@@ -32,38 +32,50 @@ void text_pen_initialize( text_pen_t *pen, int glyph_width, int glyph_height, in
 	pen->display      = &current_computer()->video_info;
 }
 
-void text_pen_carriage_return(text_pen_t *text_pen)
+void text_pen_carriage_return(text_pen_t *pen)
 {
-	text_pen->positionX = 0;
-	text_pen->positionY += text_pen->glyph_height;
+	pen->positionX = 0;
+	pen->positionY += pen->glyph_height;
 }
 
-void text_pen_advance_one_char(text_pen_t *text_pen)
+void text_pen_advance_one_char(text_pen_t *pen)
 {
-	text_pen->positionX += (text_pen->glyph_width + 1);
+	pen->positionX += (pen->glyph_width + 1);
 }
 
-void text_pen_advance_n_chars(text_pen_t *text_pen, int n)
+void text_pen_advance_n_chars(text_pen_t *pen, int n)
 {
-	text_pen->positionX = (text_pen->glyph_width + 1) * n;
+	pen->positionX = (pen->glyph_width + 1) * n;
 }
 
-void text_pen_correct_margin_if_necessary(text_pen_t *text_pen)
+int text_pen_tab_space(text_pen_t *pen)
 {
-	if (text_pen->positionX + text_pen->glyph_width > text_pen->width)
-		text_pen_carriage_return(text_pen);
+	return 4 - ((pen->positionX/pen->glyph_width) % 4);
 }
 
-void text_pen_advance_char(text_pen_t *text_pen, unsigned char nextChar)
+void text_pen_correct_margin_if_necessary(text_pen_t *pen)
 {
+	if (pen->positionX + pen->glyph_width > pen->width)
+		text_pen_carriage_return(pen);
+}
+
+void text_pen_advance_char(text_pen_t *pen, unsigned char nextChar)
+{
+	int tab_space;
 	switch (nextChar)
 	{
-		case '\n': text_pen_carriage_return(text_pen);		return;
-		case '\t': text_pen_advance_n_chars(text_pen, 4); 	break;
-		default:   text_pen_advance_one_char(text_pen);		break;
+		case '\n':
+			text_pen_carriage_return(pen);
+			return;
+		case '\t':
+			tab_space = text_pen_tab_space(pen);
+			text_pen_advance_n_chars(pen, tab_space);
+			break;
+		default:
+			text_pen_advance_one_char(pen);
 	}
 	
-	text_pen_correct_margin_if_necessary(text_pen);
+	text_pen_correct_margin_if_necessary(pen);
 }
 
 int text_pen_collected_height(text_pen_t *pen)
@@ -74,10 +86,23 @@ int text_pen_collected_height(text_pen_t *pen)
 
 void font_draw_char(text_pen_t *pen, char character)
 {
-	if (character < 32)
+	if (character == '\t')
+	{
+		int tab_space = text_pen_tab_space(pen);
+		for (int i = 0; i < tab_space; i++)
+			font_draw_char(pen, ' ');
 		return;
+	}
+	else if (character != ' ')
+	{
+		fill_rectangle(pen->display, pen->glyph_width, pen->glyph_height, pen->positionX, pen->positionY, 0);
+	}
+	else if (character < 32)
+	{	
+		return;
+	}
 		
-	bitblt_32bit_to_fb(pen->display, rasters[character-32], FONT_GLYPH_WIDTH, FONT_GLYPH_HEIGHT, pen->positionX, pen->positionY, COLOR_GREEN);
+	bitblt_32bit_to_fb(pen->display, rasters[character-32], pen->glyph_width, pen->glyph_height, pen->positionX, pen->positionY, CON_COLOR_GREEN);
 	fill_rectangle(pen->display, 1, FONT_GLYPH_HEIGHT, pen->positionX+FONT_GLYPH_WIDTH, pen->positionY, 0x00000000); // space between characters
 }
 
@@ -156,20 +181,18 @@ void console_draw_string(console_t *console, char *string)
 	}
 }
 
-
+// 
 int console_calc_height_of_line(console_t *console, char *line_start)
 {
 	text_pen_t pen;
 	text_pen_initialize(&pen, console->glyph_width, console->glyph_height, console->width);
-	
-	//printf("bla!\n");
-		
+			
 	while (*line_start != 0 && *line_start != '\n')
 	{
 		text_pen_advance_char(&pen, *line_start);
 		line_start++;
 	}
-	//printf("height...%d\n", text_pen_collected_height(&pen));
+
 	return text_pen_collected_height(&pen);
 }
 

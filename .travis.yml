@@ -1,7 +1,5 @@
 language: c
 
-install:
-  - ./install-dependencies.sh
-  - cp compilation.conf.example compilation.conf
+before_script: cp compilation.conf.example compilation.conf
 
 script: make

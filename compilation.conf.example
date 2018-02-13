@@ -1,3 +1,3 @@
-COMPILER_DIR = /Users/guidochari/opt/cross/bin/
-COMPILER_PREFIX = i686-elf-gcc
-LINKER_PREFIX = i686-elf-ld
+COMPILER_DIR = ""
+COMPILER_PREFIX = gcc
+LINKER_PREFIX = ld

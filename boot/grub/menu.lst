@@ -8,17 +8,11 @@ default 0
 ;setvbe 1024x768x32
 ;boot
 
-title ExampleNopsys 1024x768x32
+title NOS 1024x768x32
 kernel /nopsys.kernel
-;module /SqueakNOS.image
-;module /SqueakNOS.config
-setvbe 1024x768x32
-boot
-
-title SqueakNOS 1024x768x32
-kernel /SqueakNOS.kernel
 module /SqueakNOS.image
-module /SqueakNOS.config
+module /SqueakNOS.changes
+;module /SqueakNOS.config
 setvbe 1024x768x32
 boot
 
@@ -28,15 +22,4 @@ module /SqueakNOS.image
 setvbe 1024x768x16
 boot
 
-title SqueakNOS 800x600x32
-kernel /SqueakNOS.kernel
-module /SqueakNOS.image
-setvbe 800x600x32
-boot
-
-title SqueakNOS 800x600x16
-kernel /SqueakNOS.kernel
-module /SqueakNOS.image
-setvbe 800x600x16
-boot
 

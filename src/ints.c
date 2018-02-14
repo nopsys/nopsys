@@ -155,6 +155,7 @@ void isr_clock_C()
 
 void isr_page_fault_C(uint32_t error_code)
 {
+/*
 	computer_t *computer = current_computer();
 	computer->in_page_fault++;
 	computer->total_page_faults++;
@@ -172,6 +173,7 @@ void isr_page_fault_C(uint32_t error_code)
 	printf_dec_tab();
 	computer->in_page_fault--;
 	printf_tab("PageFaultISR: Sali\n");
+*/
 }
 
 

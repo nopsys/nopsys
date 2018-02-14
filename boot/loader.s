@@ -27,11 +27,12 @@
 .long 32		# depth
 
 # reserve initial kernel stack space
-.set STACKSIZE, 0x4000          # that is, 16k.
-.comm stack, STACKSIZE, 32      # reserve 16k stack on a quadword boundary
+.set STACKSIZE, 0x100000          # that is, 1mb (Cog uses plenty of stack).
+.comm stack, STACKSIZE, 32      # reserve 16k stack on a 32-byte boundary
 
 _loader:       mov   $(stack + STACKSIZE), %esp # set up the stack
                # mov   _loader, %esp
+			   sub $8, %esp                      # extra space to align the stack to 16 bytes
                push  %ebx                       # Multiboot data structure
                push  %eax                       # Multiboot magic number
 

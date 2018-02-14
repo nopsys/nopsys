@@ -16,19 +16,19 @@ void mark(int col)
 #endif
 }
 
-void fill_rectangle(display_info_t *display, int width, int height, int x, int y, uint color)
+void fill_rectangle(display_info_t *display, int width, int height, int x, int bottomy, uint color)
 {
 	uchar *dest            = display->address;
 	int bytes_per_scanline = display->bytes_per_scanline; // the amount of bytes occupied by a line of the screen's framebuffer
 	int depth              = display->depth;
 
 	uchar *components = (uchar*)&color;
-	int    first_word = bytes_per_scanline * y + BYTES_PER_PIXEL(x, depth);
+	int    line_start = bytes_per_scanline * bottomy + BYTES_PER_PIXEL(x, depth);
 	int bytes_per_row = BYTES_PER_PIXEL(width, depth);
 		
-	for (int line = y - height; line < y; line++, first_word -= bytes_per_scanline)
+	for (int line = bottomy - height; line < bottomy; line++, line_start -= bytes_per_scanline)
 	{
-		uchar *pos = dest + first_word;
+		uchar *pos = dest + line_start;
 		for (int i = 0; i < bytes_per_row; i++, pos++)
 		{
 			*pos = components[i % 4];

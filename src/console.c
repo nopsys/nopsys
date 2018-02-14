@@ -169,12 +169,13 @@ void console_set_debugging(bool debugging)
 	console.debugging_now = debugging;
 }
 
-void console_fill_remaining_line_with_background(console_t *console, int left, int top)
+void console_fill_remaining_line_with_background(console_t *console, int left, int bottom)
 {
 	display_info_t *display = &current_computer()->video_info;
-	fill_rectangle(display, console->width - left, console->glyph_height, left, top, 0x00000000);
-//	fill_rectangle(display, console->width, console->glyph_height - FONT_GLYPH_HEIGHT, 0 , top + console->glyph_height - FONT_GLYPH_HEIGHT, 0);
-
+	fill_rectangle(display, 
+				console->width - left, 
+				console->glyph_height + console->char_separation_y,
+				left, bottom, 0x00000000);
 }
 
 void console_draw_string(console_t *console, char *string)
@@ -303,17 +304,15 @@ void console_append_string(console_t *console, const char string[])
 
 void console_std_put_string(const char string[])
 {
-	if (*string == 'W') 
-		breakpoint();
-
 	console_append_string(&console, string);
+	if (string[0]== 'i' && string[1]=='o' && string[2]=='I')
+		breakpoint();
 	console_draw(&console);
 	
 }
 
 void console_std_put_char(char c)
 {
-	//breakpoint();
 	char str[2] = { c, 0 };
 	console_std_put_string(str);
 	

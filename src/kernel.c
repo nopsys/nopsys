@@ -28,7 +28,6 @@ void nopsys_exit(void)
 { 
 	console_set_debugging(true);
 	printf("exited nopsys\n\n");
-	printCallStack();               // FIXME: defined in cog, shouldnt be used here
 	serial_enter_debug_mode();
 }
 

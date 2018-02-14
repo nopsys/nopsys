@@ -6,7 +6,7 @@ RM = rm
 LD = $(COMPILER_DIR)$(LINKER_PREFIX)
 CC = $(COMPILER_DIR)$(COMPILER_PREFIX)
 
-CFLAGS = -std=c11 -m32 -Wall --no-pie -nostdlib -fno-stack-protector -g -O1 -fno-inline
+CFLAGS = -std=c11 -m32 -Wall --no-pie -nostdlib -fno-stack-protector -g -O1 -fno-inline -fno-omit-frame-pointer
 LDFLAGS = -melf_i386 -static -nostdlib -r #-Xlinker
 DEFS  = -DNO_STD_FILE_SUPPORT -DDEBUG -DLSB_FIRST -DX86
 INCS = -Ilibc

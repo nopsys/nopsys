@@ -5,7 +5,7 @@ NOPSYS_SOURCES = ../dmr/bee.bsc
 
 BLDDIR    = build
 OBJDIR    = $(BLDDIR)/objs#   temp .o files go here
-#EXTRADIR  = $(BLDDIR)/disk#   files needed for execution go here (image, sources, etc)
+EXTRADIR  = $(VM_BUILDDIR)/extra#   files needed for execution go here (image, sources, etc)
 ISODIR    = $(BLDDIR)/iso#    temp dir to put everything and package as iso
 DISTRODIR = $(BLDDIR)/distro
 
@@ -64,7 +64,7 @@ $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kern
 # make an iso (CD image)
 $(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel
 	cp -r boot/grub $(ISODIR)/boot/
-	#cp $(EXTRADIR)/* nopsys.kernel $(ISODIR)/
+	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
 	mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/

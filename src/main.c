@@ -29,7 +29,7 @@ void nopsys_main (ulong magic, multiboot_info_t *mbi)
 
 	//if (computer->image)
 	{
-		printf("Found image at %p\n", computer->image);
+		printf("Found image at %p, length %d\n", computer->image, computer->image_length);
 		nopsys_vm_main(computer->image, computer->image_length);
 	}
 	/*else
@@ -42,11 +42,7 @@ void nopsys_main (ulong magic, multiboot_info_t *mbi)
 
 void computer_initialize_from(computer_t *computer, ulong magic, multiboot_info_t *mbi)
 {
-	computer->snapshot_start = NULL;
-	computer->snapshot_end = NULL;
 	computer->image = NULL;
-	computer->in_gc = 0;
-	computer->in_page_fault = 0;
 	
 	// set the memory map that grubs passes (grub gets it by asking the bios) to
 	// a variable we can query from the image by using a primitive	
@@ -80,6 +76,7 @@ void computer_initialize_from(computer_t *computer, ulong magic, multiboot_info_
 void computer_initialize_from_modules(computer_t *computer, multiboot_info_t *mbi)
 {
 	module_t *mod = (module_t *) mbi->mods_addr;
+	printf ("mbi %p, mod = %p\n", mbi, mod);
 
 	if (mbi->mods_count >= 1)
 	{
@@ -87,7 +84,7 @@ void computer_initialize_from_modules(computer_t *computer, multiboot_info_t *mb
 		computer->image_length = mod->mod_end - mod->mod_start;
 	}
 	
-	printf ("mods_count = %u, mods_addr = %p\n", mbi->mods_count, (void*)mbi->mods_addr);
+	printf ("mods_count = %u\n", mbi->mods_count);
 		
 	for (int i = 0; i < mbi->mods_count; i++, mod++)
 	{
@@ -111,5 +108,20 @@ void computer_initialize_from_modules(computer_t *computer, multiboot_info_t *mb
 	
 }
 
+uint computer_first_free_address(computer_t *computer)
+{
+	uint result = 0;
+	multiboot_info_t *mbi = computer->mbi;
+	module_t *mod = (module_t *) mbi->mods_addr;
 
+	if (mbi->mods_count == 0)
+		perror("cant get first free address if no modules");
+ 
+	for (int i = 0; i < mbi->mods_count; i++, mod++)
+	{
+		if (mod->mod_end > result)
+			result = mod->mod_end;
+	}
+	return result;
+}
 

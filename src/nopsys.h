@@ -17,6 +17,8 @@ uint16_t get_CS();
 void*    get_CR2();
 
 computer_t* current_computer();
+
+uint computer_first_free_address(computer_t *computer);
 uint64_t current_microseconds(void);
 uint64_t current_seconds(void);
 

@@ -26,6 +26,7 @@ void nopsys_main (ulong magic, multiboot_info_t *mbi)
 	//bitblt_32bit_to_fb(splashscreen_image.pixel_data, splashscreen_image.width, splashscreen_image.height, 0, 0);
 
 	ints_init();
+	enable_sse();
 
 	//if (computer->image)
 	{

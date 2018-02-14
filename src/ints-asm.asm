@@ -5,9 +5,11 @@ extern ints_init_structs
 
 extern idt_descriptor
 
+extern printCallStack
 
 global get_CS
 global get_CR2
+global enable_sse
 global inb
 global outb
 global isr_void
@@ -82,6 +84,8 @@ extern isr_%1_C
 %macro DEFINE_HANDLER_NO_ERROR_CODE_STOP 1 ; arg: isr nameAddress
 	DEFINE_HANDLER_PROLOGUE %1
 	xchg bx, bx
+	call printCallStack
+	xchg bx, bx
 	cli
 	jmp isr_%1_ASM
 %endmacro
@@ -144,6 +148,17 @@ get_CS:
 
 get_CR2:
 	mov eax, cr2
+	ret
+
+
+enable_sse:
+	mov eax, cr0
+	and eax, 0xFFFFFFFB		;clear coprocessor emulation CR0.EM
+	or  eax, 0x2			;set coprocessor monitoring  CR0.MP
+	mov cr0, eax
+	mov eax, cr4
+	or  eax, 3 << 9		;set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
+	mov cr4, eax
 	ret
 
 inb:   ; uint8_t inb(uint16_t port)

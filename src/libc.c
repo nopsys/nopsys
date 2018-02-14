@@ -268,7 +268,6 @@ sprintf_args (char *formatted, const char *format, void *arg[])
 				copy_buf(&formatted, "<unkonwn format %");
 				buf [0] = c; buf[1] = '>'; buf[2] = 0;
 				copy_buf(&formatted, buf);
-				arg++; // discard the argument
 				break;
 			}
 		}
@@ -282,7 +281,7 @@ int printf_args(const char *format, void *arg[])
 {
 	char formatted[10000];
 
-	sprintf_args(formatted, format, arg + 1);
+	sprintf_args(formatted, format, arg);
 	putstring(formatted);
 	return 0;
 }
@@ -374,9 +373,9 @@ int fprintf(FILE *file, const char *format, ...)
 
 int fputs(const char *msg, FILE *file)
 {
-	if (file == stderr)
+	if (file == stderr || file == stdout)
 	{ 
-		printf("%s", msg);
+		printf(msg);
 		return 0;
 	}
 	else 
@@ -620,9 +619,12 @@ int mprotect(void *addr, size_t len, int prot)
 
 void perror(const char *s)
 {
+//	breakpoint();
 	// FIXME: Should print also errno and a corresponding message
 	if (s)
 		printf("%s\n", s);
+	breakpoint();
+
 	while (true) {}
 }
 

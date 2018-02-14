@@ -621,16 +621,7 @@ int mprotect(void *addr, size_t len, int prot)
 	return 0; // FIXME: STUB
 }
 
-void perror(const char *s)
-{
-//	breakpoint();
-	// FIXME: Should print also errno and a corresponding message
-	if (s)
-		printf("%s\n", s);
-	breakpoint();
 
-	while (true) {}
-}
 
 struct tm * localtime (const time_t * timer)
 {

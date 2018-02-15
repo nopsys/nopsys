@@ -14,9 +14,7 @@ LD = $(COMPILER_DIR)$(LINKER_PREFIX)
 
 -include vm.conf # '-include' doesn't fail if the file doesn't exist
 
-ccred=@echo -n "\033[0;31m"
-ccyellow=@echo -n "\033[0;33m"
-ccend=@echo -n "\033[0m"
+
 # ==============
 # pseudo targets
 # ==============
@@ -27,21 +25,7 @@ libnopsys: .ensure_dirs
 
 all: iso
 
-# generate vmware image and run it
-try-vmware: iso %.$(TARGET).vmx
-	vmplayer $(BLDDIR)/$<
-#	vmware-server-console -m -x -l "`pwd`/$<"
-#	make clean
-
 iso: $(BLDDIR)/nopsys.iso
-
-virtualBox: $(BLDDIR)/nopsys.iso
-	build/distro/virtualBox.sh
-	
-vmware: boot/vmx.cd.template
-	cp boot/vmx.cd.template $@
-	chmod +x $@
-	echo 'ide0:0.fileName = "$*.iso"' >> $@
 
 # generate a zip with all the current files, that can both be used to run or rebuild this nopsys
 distro: iso
@@ -57,6 +41,7 @@ clean:
 
 .PRECIOUS: %.img
 
+.PHONY: iso
 # ==================
 # real file targets
 # ==================
@@ -75,8 +60,20 @@ $(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
 	mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
-	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
 
+# image file for what ???
+$(BLDDIR)/nopsys.img: %.kernel $(FLOPPY)
+	cp $(FLOPPY) $(img)
+	mkdir $(mnt)
+	sudo mount -o loop $(img) $(mnt)
+	sudo cp $< $(mnt)/boot/kernel
+	sudo umount $(mnt)
+	rmdir $(mnt)
+	mv $(img) $@
+
+
+ccred=@echo -n "\033[0;31m"
+ccend=@echo -n "\033[0m"
 
 $(VM_BUILDDIR)/vm.obj:
 	@echo "------------"
@@ -90,19 +87,32 @@ $(VM_BUILDDIR)/vm.obj:
 	@echo "------------"
 	@exit 1
 	
-# image file for what ???
-%.img: %.kernel $(FLOPPY)
-	cp $(FLOPPY) $(img)
-	mkdir $(mnt)
-	sudo mount -o loop $(img) $(mnt)
-	sudo cp $< $(mnt)/boot/kernel
-	sudo umount $(mnt)
-	rmdir $(mnt)
-	mv $(img) $@
 
+$(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
+	cp boot/vmx.cd.template $@
+	chmod +x $@
+	echo 'ide0:0.fileName = "$*.iso"' >> $@
 
+$(BLDDIR)/bochsrc : boot/bochsrc
+	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
+	
 
+# system vm generation and running 
+#----------------------------------
 
+try-vmware: $(BLDDIR)/vmware.cd.vmx iso 
+	vmplayer $<
+#	vmware-server-console -m -x -l "`pwd`/$<"
+#	make clean
+
+try-vbox: iso
+	build/distro/virtualBox.sh
+
+try-bochs: iso $(BLDDIR)/bochsrc
+	cd build && bochs -q -rc bochsdbg
+
+try-qemu: iso
+	qemu-system-i386 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 128
 
 
 

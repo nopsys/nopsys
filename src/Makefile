@@ -29,7 +29,7 @@ $(OBJDIR)/%.o: %.c
 	$(CC) -o $@ $(CFLAGS) $(INCS) $(DEFS) -c $<
 
 $(OBJDIR)/%.o: %.asm 
-	nasm -f elf -o $@ $<
+	nasm -g -F dwarf -f elf -o $@ $<
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

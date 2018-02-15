@@ -95,6 +95,9 @@ $(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
 
 $(BLDDIR)/bochsrc : boot/bochsrc
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
+
+$(BLDDIR)/qemudbg:
+	echo "target remote | qemu-system-i386 -S -gdb stdio -boot d -cdrom nopsys.iso -m 128" >$@
 	
 
 # system vm generation and running 
@@ -113,6 +116,9 @@ try-bochs: iso $(BLDDIR)/bochsrc
 
 try-qemu: iso
 	qemu-system-i386 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 128
+
+try-qemudbg: iso $(BLDDIR)/qemudbg
+	cd build && gdb nopsys.kernel -x qemudbg
 
 
 

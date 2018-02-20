@@ -108,18 +108,23 @@ void serial_enter_debug_mode()
 	
 	while (1)
 	{
-		uchar next_address[4];
+		uchar next_address[8];
 		printf("Waiting... ");
 		next_address[0] = serial_read();
 		printf("Received something: %x\n", next_address[0]);
 		next_address[1] = serial_read();
 		next_address[2] = serial_read();
 		next_address[3] = serial_read();
-		
-		unsigned int *array_address = (unsigned int*)next_address;
-		unsigned int *value = (unsigned int*)*array_address;
+		next_address[4] = serial_read();
+		next_address[5] = serial_read();
+		next_address[6] = serial_read();
+		next_address[7] = serial_read();
 
-		printf("Address is %p. uint32 value: 0x%x (%d dec)\n", value, *value, *value);
+		void *address = (void*)next_address;
+		uint32_t *value32 = (uint32_t*)address;
+		uint64_t *value64 = (uint64_t*)address;
+
+		printf("Address is %p. uint32 value: 0x%x (%d dec). uint64 value: 0x%x\n", address, *value32, *value32, *value64);
 	}
 }
 

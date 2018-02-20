@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "stdio.h"
 #include "string.h"
+#include "multiboot.h"
 
 
 
@@ -50,27 +51,30 @@ void display_render(uchar   *image_src, uint32_t width, uint32_t height, uint32_
 	}
 }
 
-void display_initialize_hardcoded(display_info_t *video_info)
-{
-	video_info->width = 1200;
-	video_info->height = 900;
-	video_info->depth = 16;
-	video_info->address = (uchar*)0xfd000000;
-	video_info->bytes_per_scanline = 2400;
-}
-
 
 /**
  * video_config_line must be something like video=1024x768x32@0xf0000000,4096
  * where 0xf0000000 is the base address and 4096 is the number of bytes per scanline
  * if the number of byte per scanline is not present, it's going to be guessed (X/8)
 **/
-void display_initialize_from_cmd(display_info_t *video_info, char *video_config_line)
+void display_initialize_from_mbi(display_info_t *video_info, multiboot_info_t *mbi)
 {
-	/* video_config_line is {width}x{height}x{depth}@{address},{bytesPerScanLine}\0 */
-	char sep_tokens[] = { /*width*/ 'x', /*height*/'x', /*depth*/ '@', /*address*/ ',', /*bytesPerScanLine*/ '\0'};
-	
-	video_config_line = strstr(video_config_line, "video=") + 6;
+	if ((mbi->flags & (1<<12)) == 0)
+	{
+		while(1)
+		{ 
+			breakpoint();
+		}
+	}
+
+	video_info->width   = mbi->framebuffer_width;
+	video_info->height  = mbi->framebuffer_height;
+	video_info->depth   = mbi->framebuffer_bpp;
+	video_info->address = (uchar*)(uintptr_t)mbi->framebuffer_addr;
+	video_info->bytes_per_scanline = mbi->framebuffer_pitch;
+
+	// video_config_line is {width}x{height}x{depth}@{address},{bytesPerScanLine}\0 
+/*	video_config_line = strstr(video_config_line, "video=") + 6;
 
 	video_config_line = parse_string(video_config_line, &video_info->width,   sep_tokens[0]);
 	video_config_line = parse_string(video_config_line, &video_info->height,  sep_tokens[1]);
@@ -80,7 +84,7 @@ void display_initialize_from_cmd(display_info_t *video_info, char *video_config_
 	if (video_config_line)
 		parse_string(video_config_line, &video_info->bytes_per_scanline, sep_tokens[4]);
 	else
-		video_info->bytes_per_scanline = BYTES_PER_LINE_PADDED(video_info->width, video_info->depth);
+		video_info->bytes_per_scanline = BYTES_PER_LINE_PADDED(video_info->width, video_info->depth);*/
 }
 
 void connect_to_APM()
@@ -112,3 +116,5 @@ void computer_shutdown()
 	__asm("mov 0x3, %cx"); // power mode: shutdown
 	__asm("int $0x15"); // call the BIOS function throu
 }
+
+

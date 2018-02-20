@@ -2,11 +2,7 @@
 #ifndef _TIME_H_
 #define _TIME_H_
 
-// placeholder file in case stdlib time.h is included
-
-/*
-    Needed by void printPhaseTime(int phase) in sqVirtualMachine.h
-*/
+typedef uint64_t time_t;
 
 struct tm {
         int     tm_sec;         /* seconds after the minute [0-60] */

@@ -14,9 +14,13 @@ typedef unsigned long long uint64_t;
 
 typedef unsigned int       size_t;
 
+#ifdef __x86_64__
+typedef long long intptr_t;
+typedef unsigned long long uintptr_t;
+#else
 typedef long intptr_t;
 typedef unsigned long uintptr_t;
-
+#endif
 
 #endif  // _STDINT_H_
 

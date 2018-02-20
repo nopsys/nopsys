@@ -15,6 +15,8 @@ void ints_init();
 
 uint16_t get_CS();
 void*    get_CR2();
+void enable_sse();
+void enable_paging_using(void* page_dir);
 
 computer_t* current_computer();
 
@@ -23,7 +25,7 @@ uint64_t current_microseconds(void);
 uint64_t current_seconds(void);
 
 void display_initialize_hardcoded(display_info_t *video_info);
-void display_initialize_from_cmd(display_info_t *video_info, char *video_config_line);
+void display_initialize_from_mbi(display_info_t *video_info, multiboot_info_t *mbi);
 
 void fill_rectangle    (display_info_t *display, int width, int height, int x, int y, uint color);
 void bitblt_32bit_to_fb(display_info_t *display, uint32_t *bitmap, int width, int height, int x, int y, uint32_t colormask);

@@ -1,10 +1,10 @@
 #ifndef _NOS_TYPES_H_
 #define _NOS_TYPES_H_
 
-#include "multiboot.h"
 #include "stdbool.h"
 #include "stddef.h"
 #include "stdint.h"
+#include "multiboot.h"
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -13,7 +13,6 @@
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 typedef unsigned int  uint;
-typedef void* time_t;
 
 typedef struct display_info_t
 {

@@ -2,7 +2,7 @@
 #ifndef _MATH_H_
 #define _MATH_H_
 
-// placeholder file in case stdlib math.h is included
+int abs(int value);
 
 #endif  // _MATH_H_
 

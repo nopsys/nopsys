@@ -21,8 +21,11 @@ extern ulong tabs;
 
 long* page_directory()
 {
-	static long pd[1024+1024];
+/*	static long pd[1024+1024];
 	return (long*)((long)(pd+1023) & 0xfffff000);
+*/
+	perror("unimplemented");
+	return 0;
 }
 
 // returns a pointer to an array of 1024 page tables, of 1024 entries each.
@@ -30,14 +33,19 @@ long* page_directory()
 // 4 KB per page * 1 M pages = 4 GB
 long* page_tables_start()
 {
+/*
 	static long pt[1024*1024+1024];
 	return (long*)((long)(pt+1023) & 0xfffff000);
+*/
+	perror("unimplemented");
+	return 0;
 }
 
 void generate_empty_page_directory()
 {
+	perror("unimplemented");
 	//set each entry to not present
-	int i = 0;
+/*	int i = 0;
 	long *next_page_table = page_tables_start();
 	for(i = 0; i < 1024; i++, next_page_table += 1024)
 	{
@@ -53,14 +61,16 @@ void generate_empty_page_directory()
 		//~ //attribute: supervisor level, read/write, present.
 		//~ page_directory()[i] = (long)next_page_table;
 	//~ }
+*/
 }
 
 
 void generate_empty_page_tables()
 {
+	perror("unimplemented");
 	// holds the physical address where we want to start mapping these pages to.
 	// in this case, we want to map these pages to the very beginning of memory.
-	unsigned int address = 0; 
+/*	unsigned int address = 0; 
 	unsigned int i;
 	 
 	//we will fill all 1024*1024 entries, mapping 4 gigabytes
@@ -69,29 +79,34 @@ void generate_empty_page_tables()
 		page_tables_start()[i] = address | 3; // attributes: supervisor level, read/write, present.
 		address = address + 4096; //advance the address to the next page boundary
 	}
+*/
 }
 
 void set_table_read_only(unsigned int *pageTable, int firstIndex, int lastIndex)
 {
-	int i;
+/*	int i;
 	//printf("");
 	for (i = firstIndex; i <= lastIndex; i++)
 		pageTable[i] = pageTable[i] & 0xFFFFFFFD;
-	
+*/	
 }
 
 void set_table_read_write(unsigned int *pageTable, int firstIndex, int lastIndex)
 {
-	int i;
+	perror("unimplemented");
+/*	int i;
 	//printf("");
 	for (i = firstIndex; i <= lastIndex; i++)
 		pageTable[i] = pageTable[i] | 0x00000002;
-	
+*/	
 }
 
 void make_read_only(ulong from, ulong to)
 {
 	printf_tab("Read only from: %d to: %d\n",from,to);
+	perror("unimplemented");
+
+	/*
 	unsigned int *pageDirectory;
 
 	__asm volatile("movl %%cr3, %0": "=a" (pageDirectory));
@@ -118,13 +133,15 @@ void make_read_only(ulong from, ulong to)
 			
 		set_table_read_only((unsigned int*)(pageDirectory[i] & 0xFFFFF000), firstIndex, lastIndex);
 	}
+*/
 	
 }
 
 void make_read_write()
 {
+	perror("unimplemented");
+	/*
 	unsigned int *pageDirectory;
-
 	__asm volatile("movl %%cr3, %0": "=a" (pageDirectory));
 
 	int i;
@@ -150,24 +167,16 @@ void make_read_write()
 			
 		set_table_read_write((unsigned int*)(pageDirectory[i] & 0xFFFFF000), firstIndex, lastIndex);
 	}
+	*/
 	
 }
 
 void enable_paging_in_hardware()
 {
-	unsigned int cr0;
 	long *pd = page_directory();
 	
 	breakpoint();
-	
-	//moves pd (which is a pointer) into the cr3 register.
-	__asm volatile("mov %0, %%cr3":: "b"(pd));
-	
-	//reads cr0, switches the "paging enable" bit, and writes it back.
-	
-	__asm volatile("mov %%cr0, %0": "=b"(cr0));
-	cr0 |= 0x80000000;
-	__asm volatile("mov %0, %%cr0":: "b"(cr0));
+	enable_paging_using(pd);	
 }
 
 
@@ -177,7 +186,7 @@ void enable_paging()
 	generate_empty_page_directory();
 	enable_paging_in_hardware();
 	
-	__asm volatile("xchg %%bx, %%bx" ::: "ebx"); // This is only qemu debugging stuff...
+	breakpoint();
 }
 
 

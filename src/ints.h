@@ -24,12 +24,24 @@ typedef struct idt_descriptor_t {
         void *addr;
 } __attribute__((packed)) idt_descriptor_t;
 
+#ifdef __x86_64__
 typedef struct idt_entry_t {
-    unsigned short offset_0_15;
-    unsigned short segsel;
-    unsigned short attr;
-    unsigned short offset_16_31;
+    uint16_t offset_0_15;
+    uint16_t segsel;
+    uint16_t attr;
+    uint16_t offset_16_31;
+	uint32_t offset_32_63;
+	uint32_t reserved;
+} __attribute__((__packed__, aligned (16))) idt_entry_t;
+#else
+#error(unsupported)
+typedef struct idt_entry_t {
+    uint16_t offset_0_15;
+    uint16_t segsel;
+    uint16_t attr;
+    uint16_t offset_16_31;
 } __attribute__((__packed__, aligned (8))) idt_entry_t;
+#endif
 
 typedef int irq_semaphores_t[16];
 

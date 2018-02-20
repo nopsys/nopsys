@@ -100,9 +100,14 @@ void ints_init_structs()
 void set_idt(unsigned int index, void *handler)
 {
 	IDT[index].segsel = get_CS();
-	IDT[index].offset_0_15  = ((uint32_t)handler) & 0xffff;
+	IDT[index].offset_0_15  = ((uintptr_t)handler) & 0xffff;
 	IDT[index].attr = 0x8E00; // interrupt, dpl 0
-	IDT[index].offset_16_31 = ((uint32_t)handler) >> 16;
+	IDT[index].offset_16_31 = ((uintptr_t)handler) >> 16;
+	
+#ifdef __x86_64__
+	IDT[index].offset_32_63 = ((uintptr_t)handler) >> 32;
+	IDT[index].reserved = 0;
+#endif
 }
 
 

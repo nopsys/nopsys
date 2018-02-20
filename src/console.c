@@ -174,7 +174,7 @@ void console_fill_remaining_line_with_background(console_t *console, int left, i
 	display_info_t *display = &current_computer()->video_info;
 	fill_rectangle(display, 
 				console->width - left, 
-				console->glyph_height + console->char_separation_y,
+				console->glyph_height,
 				left, bottom, 0x00000000);
 }
 
@@ -305,8 +305,6 @@ void console_append_string(console_t *console, const char string[])
 void console_std_put_string(const char string[])
 {
 	console_append_string(&console, string);
-	if (string[0]== 'i' && string[1]=='o' && string[2]=='I')
-		breakpoint();
 	console_draw(&console);
 	
 }

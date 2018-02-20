@@ -8,8 +8,8 @@
 .set VIDINFO,  1<<2             # provide video table
 .set MAGIC,    0x1BADB002       # 'magic number' lets bootloader find the header
 
- .set FLAGS,    MEMINFO	# only Memory info 
-#.set FLAGS,    MEMINFO | VIDINFO# Memory and Video info
+# .set FLAGS,    MEMINFO	# only Memory info 
+.set FLAGS,    MEMINFO | VIDINFO # Memory and Video info
 .set CHECKSUM, -(MAGIC + FLAGS) # checksum required
 
 .align 4
@@ -30,11 +30,20 @@
 .set STACKSIZE, 0x100000          # that is, 1mb (Cog uses plenty of stack).
 .comm stack, STACKSIZE, 32      # reserve 16k stack on a 32-byte boundary
 
-_loader:       mov   $(stack + STACKSIZE), %esp # set up the stack
-               # mov   _loader, %esp
-			   sub $8, %esp                      # extra space to align the stack to 16 bytes
-               push  %ebx                       # Multiboot data structure
-               push  %eax                       # Multiboot magic number
+.code32
+_loader:
+        mov   $(stack + STACKSIZE), %esp  # set up the stack
+        # mov   _loader, %esp
 
-               call  nopsys_main            # call kernel proper
-               hlt                    # halt machine should kernel return
+		# we have to align the stack to 16 bytes, adding extra space if needed.
+		# currently, we push 16 bytes and do a jump, so there's nothing to add
+		# sub $8, %esp
+		
+		# push multiboot arguments, taking into account that we are in 32 bits mode and we will
+		# pop them in 64 bits mode.s
+		push  $0
+        push  %ebx                        # Multiboot data structure
+		push  $0
+        push  %eax                        # Multiboot magic number
+
+		jmp enable_long_mode              # and never come back

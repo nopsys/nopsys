@@ -1,6 +1,7 @@
 #include "nopsys.h"
 #include "stdio.h"
-//#include <time.h>  // needed?
+#include "string.h"
+#include "time.h"
 //#include <signal.h>
 
 
@@ -49,7 +50,7 @@ void* malloc(unsigned int size)
 	unsigned long long total;
 	total = size;
 
-	while ((int)heap_new % 4 != 0) // align to 4 bytes
+	while ((uintptr_t)heap_new % 4 != 0) // align to 4 bytes
 	{
 		heap_new++;
 	}	
@@ -77,20 +78,19 @@ void *realloc(void * ptr, unsigned int size)
 // this asumes that malloc will get each block in a contiguous always forward way
 void* valloc(size_t size)
 {
-	unsigned int result = (unsigned int)malloc(4); // get one byte to see where we are placed.
+	uintptr_t result = (uintptr_t)malloc(4); // get one byte to see where we are placed.
 	
 	// now look where is the next aligned position (could be exactly result
 	// or something near it).
-	unsigned int pagesize      = PAGESIZE;
-	unsigned int first_aligned = (result + pagesize - 1) & ~(pagesize - 1);
-	unsigned int wasted        = first_aligned - result; // calc how many bytes are wasted due to alignment
+	uintptr_t pagesize      = PAGESIZE;
+	uintptr_t first_aligned = (result + pagesize - 1) & ~(pagesize - 1);
+	uintptr_t wasted        = first_aligned - result; // calc how many bytes are wasted due to alignment
 
 	// malloc the needed amount
 	if (malloc(pagesize + wasted - 4) != (void*)result+4)
 	{
 		//this should never happen. If it happens it's a big mistake.
-		printf("ERROR in valloc: malloc not allocating contiguous positions\n");
-		nopsys_exit();
+		perror("ERROR in valloc: malloc not allocating contiguous positions\n");
 	}
 
 	return (void*)first_aligned;
@@ -111,8 +111,7 @@ void free(void *p)
 
 
 
-void
-uitoa (uint32_t value, char *str_out, int base)
+void uitoa64 (uint64_t value, char *str_out, int base)
 {
 	char *p = str_out;
 
@@ -144,7 +143,7 @@ uitoa (uint32_t value, char *str_out, int base)
 	}
 }
 
-void itoa (int value, char *str_out, int base)
+void itoa64 (int64_t value, char *str_out, int base)
 {
 	/* Special case for base 10: consider it signed, put `-' if needed */
 	if (base == 10 && value < 0)
@@ -153,7 +152,7 @@ void itoa (int value, char *str_out, int base)
 		value = -value;
 	}
 
-	uitoa((uint32_t)value, str_out, base);
+	uitoa64((uint64_t)value, str_out, base);
 }
 
 /**
@@ -197,7 +196,8 @@ void putstring(const char *str)
 
 }
 
-static char* copy_buf(char **pformatted, const char *buf)
+static 
+void copy_buf(char **pformatted, const char *buf)
 {
 	char *formatted = *pformatted;
 	int len = strlen(buf);
@@ -232,22 +232,22 @@ sprintf_args (char *formatted, const char *format, void *arg[])
 			case 'p':
 				*formatted++ = '0';
 				*formatted++ = 'x';
-				uitoa ((int)value, buf, 16);
+				uitoa64 ((uintptr_t)value, buf, 16);
 				copy_buf(&formatted, buf);
 				break;
 
 			case 'x':
-				uitoa ((int)value, buf, 16);
+				uitoa64 ((uintptr_t)value, buf, 16);
 				copy_buf(&formatted, buf);
 				break;
 
 			case 'u':
-				uitoa ((int)value, buf, 10);
+				uitoa64 ((uintptr_t)value, buf, 10);
 				copy_buf(&formatted, buf);
 				break;
 
 			case 'd':
-				itoa ((int)value, buf, 10);
+				itoa64 ((uintptr_t)value, buf, 10);
 				copy_buf(&formatted, buf);
 				break;
 
@@ -285,6 +285,7 @@ int printf_args(const char *format, void *arg[])
 	return 0;
 }
 
+/* in 64 bits args are passed in registers, check the asm
 int printf (const char *format, ...)
 {
 	void **arg = (void **) &format;
@@ -296,7 +297,7 @@ int sprintf (char *formatted, const char *format, ...)
 	void **arg = (void **) &format;
 	return sprintf_args(formatted, format, arg + 1);
 }
-
+*/
 
 int printf_fixed_size(const char *string, const long size)
 {
@@ -349,9 +350,9 @@ int close(int fildes)
     return 0;
 }
  
-int fclose(int fildes)
+int fclose(FILE* f)
 {
-	return close(fileno(fildes));
+	return close(fileno(f));
 }
 
 FILE *stdin  = (FILE *) 0;
@@ -408,7 +409,7 @@ int fflush (FILE *f)
 
 int fileno(FILE *f)
 {
-	return (int)f;
+	return (int)(intptr_t)f;
 }
 
 int getchar(void)
@@ -485,8 +486,8 @@ void *memmove(void *dest, const void *src, size_t n)
 	if (s+n <= d || d+n <= s) return memcpy(d, s, n);
 
 	if (d<s) {
-		if ((uint)s % WS == (uint)d % WS) {
-			while ((uint)d % WS) {
+		if ((uintptr_t)s % WS == (uintptr_t)d % WS) {
+			while ((uintptr_t)d % WS) {
 				if (!n--) return dest;
 				*d++ = *s++;
 			}
@@ -494,8 +495,8 @@ void *memmove(void *dest, const void *src, size_t n)
 		}
 		for (; n; n--) *d++ = *s++;
 	} else {
-		if ((uint)s % WS == (uint)d % WS) {
-			while ((uint)(d+n) % WS) {
+		if ((uintptr_t)s % WS == (uintptr_t)d % WS) {
+			while ((uintptr_t)(d+n) % WS) {
 				if (!n--) return dest;
 				d[n] = s[n];
 			}

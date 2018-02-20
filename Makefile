@@ -97,7 +97,11 @@ $(BLDDIR)/bochsrc : boot/bochsrc
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
 
 $(BLDDIR)/qemudbg:
-	echo "target remote | qemu-system-i386 -S -gdb stdio -boot d -cdrom nopsys.iso -m 128" >$@
+	echo "set history save" >$@
+	echo "set disassembly-flavor intel" >$@
+	echo "set directories ../src" >$@
+	echo "target remote localhost:1234" >$@
+	#echo "target remote | qemu-system-x86_64 -S -gdb stdio -boot d -cdrom nopsys.iso -m 128" >$@
 	
 
 # system vm generation and running 
@@ -118,7 +122,11 @@ try-qemu: iso
 	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 128
 
 try-qemudbg: iso $(BLDDIR)/qemudbg
-	cd build && gdb nopsys.kernel -x qemudbg
+	# use setsid so that ctrl+c in gdb doesn't kill qemu
+	cd build && setsid qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 128 &
+	sleep 5
+	cd build && gdb nopsys.kernel -x qemudbg 
+	# in gdb console you have to enter 
 
 
 

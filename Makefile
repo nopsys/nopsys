@@ -36,7 +36,7 @@ clean:
 	rm -rf $(BLDDIR) # -rm -rf $(BLDDIR)
 
 .ensure_dirs:
-	mkdir -p $(BLDDIR) $(ISODIR) $(ISODIR)/boot $(DISTRODIR) $(OBJDIR)
+	mkdir -p $(BLDDIR) $(ISODIR) $(ISODIR)/boot/grub $(DISTRODIR) $(OBJDIR)
 
 .PRECIOUS: %.img
 
@@ -54,8 +54,8 @@ $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kern
 
 
 # make an iso (CD image)
-$(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub/grub.cfg
-	cp -r boot/grub $(ISODIR)/boot/
+$(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub.cfg
+	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
 	grub-mkrescue -o $@ $(ISODIR)

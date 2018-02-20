@@ -6,15 +6,16 @@ RM = rm
 LD = $(COMPILER_DIR)$(LINKER_PREFIX)
 CC = $(COMPILER_DIR)$(COMPILER_PREFIX)
 
-CFLAGS = -std=c11 -m32 -Wall --no-pie -nostdlib -fno-stack-protector -g -O1 -fno-inline -fno-omit-frame-pointer
-LDFLAGS = -melf_i386 -static -nostdlib -r #-Xlinker
-DEFS  = -DNO_STD_FILE_SUPPORT -DDEBUG -DLSB_FIRST -DX86
+CFLAGS  = $(CFLAGS_ARCH) -std=c11 -Wall --no-pie -ffreestanding -nostdlib -fno-stack-protector -g -O1 -fno-inline -fno-omit-frame-pointer
+LDFLAGS = $(LDFLAGS_ARCH) -static -nostdlib -r #-Xlinker
+DEFS = -DNO_STD_FILE_SUPPORT -DDEBUG -DLSB_FIRST $(DEFS_ARCH)
 INCS = -Ilibc
+
 
 BLDDIR  = ../build
 OBJDIR  = $(BLDDIR)/objs
 
-VMSRC   = $(wildcard *.c *.asm)
+VMSRC   = $(wildcard *.c ints-asm.asm setjmp-x64.asm)
 VMOBJS1  = $(VMSRC:.c=.o)
 VMOBJS  = $(VMOBJS1:.asm=.o)
 ALLOBJS = $(addprefix $(OBJDIR)/, $(VMOBJS) libgcc.o)
@@ -29,7 +30,7 @@ $(OBJDIR)/%.o: %.c
 	$(CC) -o $@ $(CFLAGS) $(INCS) $(DEFS) -c $<
 
 $(OBJDIR)/%.o: %.asm 
-	nasm -g -F dwarf -f elf -o $@ $<
+	nasm -g -F dwarf $(NASMFLAGS_ARCH) -o $@ $<
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
@@ -37,9 +38,8 @@ $(OBJDIR):
 clean:
 	rm -f $(OBJDIR)/*.o
 
-LIBGCCOBJS = _udivdi3.o _divdi3.o _moddi3.o _umoddi3.o
-
 # Extra specific dependencies
+LIBGCCOBJS = _udivdi3.o _divdi3.o _moddi3.o _umoddi3.o
 
 $(OBJDIR)/libgcc.o: 
 	$(AR) x `$(CC) $(CFLAGS) -print-libgcc-file-name` $(LIBGCCOBJS)

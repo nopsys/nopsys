@@ -14,7 +14,6 @@ LD = $(COMPILER_DIR)$(LINKER_PREFIX)
 
 -include vm.conf # '-include' doesn't fail if the file doesn't exist
 
-
 # ==============
 # pseudo targets
 # ==============
@@ -48,18 +47,19 @@ clean:
 
 # object file to be loaded by grub, your dialect should have generated a vm.obj file and put in BLDDIR 
 $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kernel.ld
-	$(AS) -o $(BLDDIR)/loader.o --32 -march=i386 boot/loader.s
-	$(LD) -o $(BLDDIR)/nopsys.kernel -m elf_i386 -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
+	$(AS) -o $(BLDDIR)/loader.o $(ASFLAGS_ARCH) boot/loader.s
+	$(LD) -o $(BLDDIR)/nopsys.kernel $(LDFLAGS_ARCH) -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
 	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3}' > $(BLDDIR)/nopsys.sym
 
 
 
 # make an iso (CD image)
-$(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel
+$(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub/grub.cfg
 	cp -r boot/grub $(ISODIR)/boot/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
-	mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
+	grub-mkrescue -o $@ $(ISODIR)
+	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
 # image file for what ???
 $(BLDDIR)/nopsys.img: %.kernel $(FLOPPY)
@@ -115,7 +115,7 @@ try-bochs: iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg
 
 try-qemu: iso
-	qemu-system-i386 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 128
+	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 128
 
 try-qemudbg: iso $(BLDDIR)/qemudbg
 	cd build && gdb nopsys.kernel -x qemudbg

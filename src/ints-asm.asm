@@ -29,10 +29,8 @@ global enable_long_mode
 ;	push es
 ;	push ds
 	push rax
-	push rbx
 	push rcx
 	push rdx
-	push rbp
 	push rsp
 	push rsi
 	push rdi
@@ -40,17 +38,9 @@ global enable_long_mode
 	push r9
 	push r10
 	push r11
-	push r12
-	push r13
-	push r14
-	push r15
 %endmacro
 
 %macro POP_ALL_REGS 0
-	pop r15
-	pop r14
-	pop r13
-	pop r12
 	pop r11
 	pop r10
 	pop r9
@@ -58,10 +48,8 @@ global enable_long_mode
 	pop rdi
 	pop rsi
 	pop rsp
-	pop rbp
 	pop rdx
 	pop rcx
-	pop rbx
 	pop rax
 ;	pop ds
 ;	pop es
@@ -76,26 +64,16 @@ global enable_long_mode
 	POP_ALL_REGS
 %endmacro
 
-%macro DEFINE_HANDLER_PROLOGUE 1 ; arg: isr name
+%macro ISR_HANDLER_PROLOGUE 1 ; arg: isr name
 global isr_%1_ASM
 
 ALIGN
 isr_%1_ASM:
 %endmacro
 
-%macro DEFINE_HANDLER_SIMPLE 1   ; arg: isr name
-extern isr_%1_C
-	DEFINE_HANDLER_PROLOGUE %1
-;	xchg bx, bx
-	SAVE_CONTEXT
-	call isr_%1_C
-	RESTORE_CONTEXT
-	iretq
-%endmacro
-
 %macro DEFINE_HANDLER_PASS_CONSTANT 2    ; args: number, C handler
 extern %2
-	DEFINE_HANDLER_PROLOGUE %1
+	ISR_HANDLER_PROLOGUE %1
 	SAVE_CONTEXT
 	push %1
 	call %2
@@ -112,9 +90,9 @@ extern %2
 	DEFINE_HANDLER_PASS_CONSTANT %1,ints_signal_slave_semaphore
 %endmacro
 
-%macro DEFINE_HANDLER_WITH_ERROR_CODE 1 ; arg: isr name
+%macro DEFINE_HANDLER_CALL_C 1 ; arg: isr name
 extern isr_%1_C
-	DEFINE_HANDLER_PROLOGUE %1
+	ISR_HANDLER_PROLOGUE %1
 	push rax
 	mov  rax, [esp+8]  ; error code
 	SAVE_CONTEXT
@@ -128,22 +106,34 @@ extern isr_%1_C
 %endmacro
 
 %macro DEFINE_HANDLER_NO_ERROR_CODE_STOP 1 ; arg: isr nameAddress
-	DEFINE_HANDLER_PROLOGUE %1
-	xchg bx, bx
-	call printCallStack
-	xchg bx, bx
-	cli
-	jmp isr_%1_ASM
+	ISR_HANDLER_PROLOGUE %1
+	mov rax, %1
+	jmp isr_handler_common_stop
 %endmacro
 
 %macro DEFINE_HANDLER_WITH_ERROR_CODE_STOP 1 ; arg: isr nameAddress
 	DEFINE_HANDLER_NO_ERROR_CODE_STOP %1
 %endmacro
 
-
+; ==============================
+; end of macros
+; ==============================
 section .text
 
-DEFINE_HANDLER_SIMPLE clock 
+isr_handler_common_stop:
+	xchg bx, bx
+	jmp $
+
+
+extern isr_clock_C
+
+ISR_HANDLER_PROLOGUE clock
+;	xchg bx, bx
+	SAVE_CONTEXT
+	call isr_clock_C
+	RESTORE_CONTEXT
+	iretq
+
 DEFINE_MASTER_SEMAPHORE_ISR 33  ; keyboard
 
 DEFINE_HANDLER_NO_ERROR_CODE_STOP 0
@@ -163,7 +153,7 @@ DEFINE_HANDLER_WITH_ERROR_CODE_STOP 13
 
 DEFINE_HANDLER_WITH_ERROR_CODE_STOP 15
 
-DEFINE_HANDLER_WITH_ERROR_CODE page_fault
+DEFINE_HANDLER_CALL_C page_fault
 
 ALIGN
 isr_void:
@@ -516,6 +506,8 @@ long_mode:
     call  nopsys_main            ; call kernel proper
     hlt                          ; halt machine should kernel return
 
+
+section .bss
 
 align 4096
 page_map_l4: resq 512

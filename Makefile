@@ -58,7 +58,7 @@ $(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub.cfg
 	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
-	grub-mkrescue -o $@ $(ISODIR)
+	grub-mkrescue --xorriso=$(XORRISO_DIR)/xorriso -o $(ISODIR)/nopsys.iso $(ISODIR)
 	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
 # image file for what ???
@@ -112,8 +112,8 @@ try-vmware: $(BLDDIR)/vmware.cd.vmx iso
 #	vmware-server-console -m -x -l "`pwd`/$<"
 #	make clean
 
-try-vbox: iso
-	build/distro/virtualBox.sh
+try-virtualbox: iso
+	scripts/virtualBox.sh
 
 try-bochs: iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg

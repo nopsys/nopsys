@@ -5,6 +5,7 @@ LINKER_PREFIX = ld
 ASFLAGS32 = --32 -march=i386
 ASFLAGS64 = --64 -march=i386
 
+NASM = nasm
 NASMFLAGS64 = -f elf64
 
 CFLAGS32 = -m32

@@ -4,6 +4,11 @@
 #include "libc.h"
 
 
+void fbreakpoint()
+{
+	return;
+}
+
 int16_t repack(int16_t pixel)
 {
   return ((pixel & 0x7fe0) << 1)

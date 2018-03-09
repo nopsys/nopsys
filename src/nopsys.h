@@ -2,7 +2,11 @@
 #include "types.h"
 
 #define breakpoint() __asm("xchg %bx, %bx");
-//#define breakpoint() __asm volatile("xchg %%bx, %%bx" ::: "ebx");  // or use this? which is best?
+
+// a function that does *nothing*, but you can put a breakpoint on it with gdb like this:
+// (gdb) b fbreakpoint
+// so that it then works similarly to xchg bx, bx
+void fbreakpoint(); 
 
 int  nopsys_vm_main(void *image, uint image_length);
 __attribute__ ((noreturn)) void nopsys_exit();

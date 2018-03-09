@@ -2,14 +2,17 @@ COMPILER_DIR =
 COMPILER_PREFIX = gcc
 LINKER_PREFIX = ld
 
+# only needed if you have a xorriso installed non system-wide (don't forget the / at the end)
+XORRISO_DIR = /usr/bin/
+
 ASFLAGS32 = --32 -march=i386
-ASFLAGS64 = --64 -march=i386
+ASFLAGS64 = --64 -march=i386 -mno-red-zone
 
 NASM = nasm
 NASMFLAGS64 = -f elf64
 
 CFLAGS32 = -m32
-CFLAGS64 = -m64
+CFLAGS64 = -m64 -mno-red-zone
 
 LDFLAGS32 = -melf_i386
 LDFLAGS64 = -melf_x86_64

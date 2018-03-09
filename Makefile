@@ -58,7 +58,7 @@ $(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub.cfg
 	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
-	grub-mkrescue --xorriso=$(XORRISO_DIR)/xorriso -o $(ISODIR)/nopsys.iso $(ISODIR)
+	grub-mkrescue --xorriso=$(XORRISO_DIR)xorriso -o $(ISODIR)/nopsys.iso $(ISODIR)
 	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
 # image file for what ???
@@ -91,7 +91,7 @@ $(VM_BUILDDIR)/vm.obj:
 $(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
 	cp boot/vmx.cd.template $@
 	chmod +x $@
-	echo 'ide0:0.fileName = "$*.iso"' >> $@
+	echo 'ide0:0.fileName = "iso/$*.iso"' >> $@
 
 $(BLDDIR)/bochsrc : boot/bochsrc
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
@@ -119,12 +119,12 @@ try-bochs: iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg
 
 try-qemu: iso
-	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 128
+	qemu-system-x86_64 -boot d -cdrom $(ISODIR)/nopsys.iso -m 128
 
 try-qemudbg: iso $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
-	cd build && setsid qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 128 &
-	sleep 5
+	cd $(BLDDIR) && setsid qemu-system-x86_64 -s -boot d -cdrom iso/nopsys.iso -m 128 &
+	sleep 4
 	cd build && gdb nopsys.kernel -x qemudbg 
 	# in gdb console you have to enter 
 

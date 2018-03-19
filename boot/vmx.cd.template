@@ -3,7 +3,7 @@
 config.version = "8"
 virtualHW.version = "4"
 
-memsize = "64"
+memsize = "256"
 guestOS = "other"
 
 uuid.location = "56 4d 5d 0f 5f 99 7b 6c-6c 9d 68 9f 30 f6 e3 26"

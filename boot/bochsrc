@@ -150,8 +150,8 @@ cpu: count=1, ips=50000000, reset_on_triple_fault=0, cpuid_limit_winnt=0, msrs="
 # The default is 32MB, most OS's won't need more than that.
 # The maximum amount of memory supported is 2048Mb.
 #=======================================================================
-#megs: 256
-megs: 128
+megs: 256
+#megs: 128
 #megs: 64
 #megs: 32
 #megs: 16

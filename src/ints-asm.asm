@@ -112,7 +112,13 @@ extern isr_%1_C
 %endmacro
 
 %macro DEFINE_HANDLER_WITH_ERROR_CODE_STOP 1 ; arg: isr nameAddress
-	DEFINE_HANDLER_NO_ERROR_CODE_STOP %1
+	ISR_HANDLER_PROLOGUE %1
+	;jmp [esp+8]   ;uncomment if you want the exception to repeat again and again
+
+	;add esp, 8    ; idem prev but using iret. remove error code and iret
+	;iret
+	mov rax, %1
+	jmp isr_handler_common_stop
 %endmacro
 
 ; ==============================

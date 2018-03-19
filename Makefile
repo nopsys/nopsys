@@ -119,12 +119,12 @@ try-bochs: iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg
 
 try-qemu: iso
-	qemu-system-x86_64 -boot d -cdrom $(ISODIR)/nopsys.iso -m 128
+	qemu-system-x86_64 -boot d -cdrom $(ISODIR)/nopsys.iso -m 256
 
 try-qemudbg: iso $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
-	cd $(BLDDIR) && setsid qemu-system-x86_64 -s -boot d -cdrom iso/nopsys.iso -m 128 &
-	sleep 4
+	cd $(BLDDIR) && setsid qemu-system-x86_64 -s -boot d -cdrom iso/nopsys.iso -m 256 &
+	sleep 4.9
 	cd build && gdb nopsys.kernel -x qemudbg 
 	# in gdb console you have to enter 
 

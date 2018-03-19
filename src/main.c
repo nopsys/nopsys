@@ -22,7 +22,8 @@ void nopsys_main (ulong magic, multiboot_info_t *mbi)
 	//fill_rectangle(100, 50, 700, 300, 0x00ff0000);
 	//fill_rectangle(100, 50, 700, 350, 0x0000ff00);
 	//fill_rectangle(100, 50, 700, 400, 0x000000ff);
-	memcpy (computer->video_info.address, splashscreen_image.pixel_data, splashscreen_image.width * splashscreen_image.height * 4);
+	for (int i = 0; i < 100; i++)	
+		memcpy (computer->video_info.address, splashscreen_image.pixel_data, splashscreen_image.width * splashscreen_image.height * 4);
 	//bitblt_32bit_to_fb(splashscreen_image.pixel_data, splashscreen_image.width, splashscreen_image.height, 0, 0);
 
 	breakpoint();
@@ -110,9 +111,9 @@ void computer_initialize_from_modules(computer_t *computer, multiboot_info_t *mb
 	
 }
 
-uint computer_first_free_address(computer_t *computer)
+uintptr_t computer_first_free_address(computer_t *computer)
 {
-	uint result = 0;
+	uintptr_t result = 0;
 	multiboot_info_t *mbi = computer->mbi;
 	module_t *mod = (module_t *)(uintptr_t)mbi->mods_addr;
 

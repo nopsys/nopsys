@@ -24,7 +24,7 @@ void enable_paging_using(void* page_dir);
 
 computer_t* current_computer();
 
-uint computer_first_free_address(computer_t *computer);
+uintptr_t computer_first_free_address(computer_t *computer);
 uint64_t current_microseconds(void);
 uint64_t current_seconds(void);
 

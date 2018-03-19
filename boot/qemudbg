@@ -1,0 +1,21 @@
+set history save
+set disassembly-flavor intel
+target remote localhost:1234
+set directories ../src
+b isr_0_ASM
+b isr_1_ASM
+b isr_2_ASM
+b isr_3_ASM
+b isr_4_ASM
+b isr_5_ASM
+b isr_6_ASM
+b isr_7_ASM
+b isr_8_ASM
+b isr_9_ASM
+b isr_10_ASM
+b isr_11_ASM
+b isr_12_ASM
+b isr_13_ASM
+
+# echo "target remote | qemu-system-x86_64 -S -gdb stdio -boot d -cdrom nopsys.iso -m 256" >$@
+

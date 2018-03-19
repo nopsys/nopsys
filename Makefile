@@ -97,12 +97,7 @@ $(BLDDIR)/bochsrc : boot/bochsrc
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
 
 $(BLDDIR)/qemudbg:
-	echo "set history save" >$@
-	echo "set disassembly-flavor intel" >$@
-	echo "set directories ../src" >$@
-	echo "target remote localhost:1234" >$@
-	#echo "target remote | qemu-system-x86_64 -S -gdb stdio -boot d -cdrom nopsys.iso -m 128" >$@
-	
+	cp boot/qemudbg $(BLDDIR)/	
 
 # system vm generation and running 
 #----------------------------------

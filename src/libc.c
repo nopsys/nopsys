@@ -40,38 +40,48 @@ void exit(int a)
 } 
 
 
+static char *last_malloc_ptr = NULL;
+static size_t last_malloc_size = 0;
 
-void* malloc(unsigned int size)
+void* malloc(size_t size)
 {
 	static char heap[HEAP_SIZE];
 	static char *heap_end = &heap[HEAP_SIZE];
 	static char *heap_new = heap;
 
-	unsigned long long total;
-	total = size;
+	last_malloc_size = size;
 
-	while ((uintptr_t)heap_new % 4 != 0) // align to 4 bytes
-	{
-		heap_new++;
-	}	
+	heap_new = (char*)(((uintptr_t)heap_new + 3) & -4); // align to 4 bytes
 
-	if (heap_new + total < heap_end)
+	if (heap_new + size < heap_end)
 	{
-		char *answer = heap_new;
-		
-		heap_new += total;
-		return answer;
+		last_malloc_ptr = heap_new;	
+		heap_new += size;
+		return last_malloc_ptr;
 	}
+
 	printf("malloc got out of space. You asked for (%d) bytes.\n", size);
 	nopsys_exit();
 	return 0;
 }
 
-void *realloc(void * ptr, unsigned int size)
+void *realloc(void *ptr, size_t size)
 {
-	printf("Someone called unimplemented realloc. Exiting.");
-	nopsys_exit();
-	return 0;
+    if (ptr == NULL)
+		return malloc(size);
+
+    if (ptr == last_malloc_ptr)
+	{
+		void *extra = malloc(size - last_malloc_size); //add more memory
+		last_malloc_ptr = ptr;
+		last_malloc_size = size;
+	    printf("REALLOC %p size = %d, extending with %p\n", ptr, size, extra);
+		//      printf("REALLOC %x new size = %d\n", ptr, size);
+		return ptr;
+    }
+
+    printf("REALLOC %x size = %d #######################################\n", ptr, size);
+    return malloc(size);
 }
 
 
@@ -87,7 +97,7 @@ void* valloc(size_t size)
 	uintptr_t wasted        = first_aligned - result; // calc how many bytes are wasted due to alignment
 
 	// malloc the needed amount
-	if (malloc(pagesize + wasted - 4) != (void*)result+4)
+	if (malloc(size + wasted - 4) != (void*)result+4)
 	{
 		//this should never happen. If it happens it's a big mistake.
 		perror("ERROR in valloc: malloc not allocating contiguous positions\n");
@@ -97,9 +107,11 @@ void* valloc(size_t size)
 }
 
 
-void *calloc(unsigned int count, unsigned int size)
+void *calloc(size_t count, size_t size)
 {
-	return malloc(count*size);
+	void *ptr = malloc(count * size); 
+    memset(ptr, 0, count * size);
+    return ptr;
 }
 
 void free(void *p)

@@ -27,7 +27,7 @@ then
 fi
 
 ## The VM characteristics
-ISOFILE="build/iso/nopsys.iso"
+ISOFILE="build/nopsys.iso"
 VRAM="32"
 MEMORY="1024"  
 

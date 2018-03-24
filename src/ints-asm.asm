@@ -8,6 +8,7 @@ extern nopsys_main
 
 extern printf_args
 extern sprintf_args
+extern snprintf_args
 
 
 global get_CS
@@ -18,6 +19,7 @@ global inb
 global outb
 global printf
 global sprintf
+global snprintf
 
 global isr_void
 global ints_init
@@ -105,15 +107,22 @@ extern isr_%1_C
 	iretq
 %endmacro
 
+
 %macro DEFINE_HANDLER_NO_ERROR_CODE_STOP 1 ; arg: isr nameAddress
 	ISR_HANDLER_PROLOGUE %1
 	mov rax, %1
+	xchg bx, bx
+	jmp $
+	jmp [esp]
+
+	;add esp, 8    ; idem prev but using iret. remove error code and iret
+	;iret
 	jmp isr_handler_common_stop
 %endmacro
 
 %macro DEFINE_HANDLER_WITH_ERROR_CODE_STOP 1 ; arg: isr nameAddress
 	ISR_HANDLER_PROLOGUE %1
-	;jmp [esp+8]   ;uncomment if you want the exception to repeat again and again
+	jmp [esp+8]   ;uncomment if you want the exception to repeat again and again
 
 	;add esp, 8    ; idem prev but using iret. remove error code and iret
 	;iret
@@ -241,7 +250,7 @@ printf:
 	push rbp
 	mov rbp, rsp
 	sub rsp, 0x60
-                         ;do not save rdi because it is expected in rdi by printf_args
+                         ;do not touch rdi because it is already expected in rdi by printf_args
 	mov [rsp+0x08], rsi
 	mov [rsp+0x10], rdx
 	mov [rsp+0x18], rcx
@@ -279,8 +288,8 @@ sprintf:
 	push rbp
 	mov rbp, rsp
 	sub rsp, 0x60
-                         ;do not save rdi because it is expected in rdi by printf_args
-                         ;do not save rsi because it is expected in rsi by sprintf_args
+                         ;do not touch rdi because it is already expected in rdi by sprintf_args
+                         ;do not touch rsi because it is already expected in rsi by sprintf_args
 	mov [rsp+0x10], rdx
 	mov [rsp+0x18], rcx
 	mov [rsp+0x20], r8
@@ -307,7 +316,43 @@ sprintf:
 	pop rbp
 	ret
 
+;int snprintf (char *formatted, size_t max_size, const char *format, ...)
+;{
+;	void **arg = (void **) &format;
+;	return sprintf_args(formatted, format, arg + 1);
+;}
 
+snprintf:
+	push rbp
+	mov rbp, rsp
+	sub rsp, 0x60
+                         ;do not touch rdi because it is already expected in rdi by snprintf_args
+                         ;do not touch rsi because it is already expected in rsi by snprintf_args
+	;mov [rsp+0x10], rdx ;do not touch rsi because it is already expected in rsi by snprintf_args
+	mov [rsp+0x18], rcx
+	mov [rsp+0x20], r8
+	mov [rsp+0x28], r9
+	mov r11, [rbp+0x10]  ; first pushed argument
+	mov [rsp+0x30], r11
+	mov r11, [rbp+0x18]  ; first pushed argument
+	mov [rsp+0x38], r11
+	mov r11, [rbp+0x20]  ; first pushed argument
+	mov [rsp+0x40], r11
+	mov r11, [rbp+0x28]  ; first pushed argument
+	mov [rsp+0x48], r11
+	mov r11, [rbp+0x30]  ; first pushed argument
+	mov [rsp+0x50], r11
+	mov r11, [rbp+0x38]  ; first pushed argument
+	mov [rsp+0x58], r11
+	mov r11, [rbp+0x40]  ; first pushed argument
+	mov [rsp+0x60], r11
+
+	lea rcx, [rsp+0x18]
+	call snprintf_args
+	add rsp, 0x60
+
+	pop rbp
+	ret
 
 ; enable_paging_using(void* page_dir)
 ; page_dir -> rdi

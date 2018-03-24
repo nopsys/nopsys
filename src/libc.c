@@ -217,16 +217,30 @@ void copy_buf(char **pformatted, const char *buf)
 	*pformatted = formatted + len;
 }
 
+/*
+static
+void* casted_int_value(void *value, char length)
+{
+	if (length == 0 || length = 'l')
+		(int)value;
+}*/
+
 /* Format a string and print it on the screen, just like the libc
    function printf.  */
 int
-sprintf_args (char *formatted, const char *format, void *arg[])
+snprintf_impl (char *formatted, size_t max_size, const char *format, void *arg[])
 {
 	int c;
 	char buf[20];
+	char *end = formatted + max_size;
 
 	while ((c = *format++) != 0)
 	{
+		if (formatted >= end) 
+			return max_size;
+
+		// FIXME: correctly check max_size
+
 		if (c != '%')
 		{
 			*formatted++ = c;
@@ -235,51 +249,63 @@ sprintf_args (char *formatted, const char *format, void *arg[])
 		{
 			char *p;
 			void *value = *arg;
+			bool ended = false;
+			char length = 0;
 
 			arg++;
 
-			c = *format++;
-			switch (c)
+			while (!ended)
 			{
-			case 'p':
-				*formatted++ = '0';
-				*formatted++ = 'x';
-				uitoa64 ((uintptr_t)value, buf, 16);
-				copy_buf(&formatted, buf);
-				break;
+				c = *format++;
+				switch (c)
+				{
+				case 'p':
+					*formatted++ = '0';
+					*formatted++ = 'x';
+					uitoa64 ((uintptr_t)value, buf, 16);
+					copy_buf(&formatted, buf);
+					ended = true;
+					break;
 
-			case 'x':
-				uitoa64 ((uintptr_t)value, buf, 16);
-				copy_buf(&formatted, buf);
-				break;
+				case 'x':
+					uitoa64 ((uintptr_t)value, buf, 16);
+					copy_buf(&formatted, buf);
+					ended = true;
+					break;
 
-			case 'u':
-				uitoa64 ((uintptr_t)value, buf, 10);
-				copy_buf(&formatted, buf);
-				break;
+				case 'u':
+					uitoa64 ((uintptr_t)value, buf, 10);
+					copy_buf(&formatted, buf);
+					ended = true;
+					break;
 
-			case 'd':
-				itoa64 ((uintptr_t)value, buf, 10);
-				copy_buf(&formatted, buf);
-				break;
+				case 'd':
+					itoa64 ((uintptr_t)value, buf, 10);
+					copy_buf(&formatted, buf);
+					ended = true;
+					break;
 
-			case 's':
-				p = (char*)value;
-				if (!p)
-					p = "(null)";
+				case 's':
+					p = (char*)value;
+					if (!p)
+						p = "(null)";
 
-				copy_buf(&formatted, p);
-				break;
+					copy_buf(&formatted, p);
+					ended = true;
+					break;
 
-			case 'l': //operand size unsupported
-				break; 
+				case 'l':
+					length = 'l';
+					break; 
 					
 
-			default:
-				copy_buf(&formatted, "<unkonwn format %");
-				buf [0] = c; buf[1] = '>'; buf[2] = 0;
-				copy_buf(&formatted, buf);
-				break;
+				default:
+					copy_buf(&formatted, "<unkonwn format %");
+					buf [0] = c; buf[1] = '>'; buf[2] = 0;
+					copy_buf(&formatted, buf);
+					ended = true;
+					break;
+				}
 			}
 		}
 	}
@@ -288,11 +314,27 @@ sprintf_args (char *formatted, const char *format, void *arg[])
 	return 0; // should return num of chars written
 }
 
-int printf_args(const char *format, void *arg[])
+int printf_args(const char *format, void *args[])
 {
 	char formatted[10000];
 
-	sprintf_args(formatted, format, arg);
+	snprintf_impl(formatted, 10000, format, args);
+	putstring(formatted);
+	return 0;
+}
+
+int sprintf_args(const char *format, void *args[])
+{
+	char formatted[10000];
+
+	snprintf_impl(formatted, 10000, format, args);
+	putstring(formatted);
+	return 0;
+}
+
+int snprintf_args(char *formatted, size_t max_size, const char *format, void *args[])
+{
+	snprintf_impl(formatted, max_size, format, args);
 	putstring(formatted);
 	return 0;
 }
@@ -531,6 +573,19 @@ int strlen(const char *s)
 	return len;
 }
 
+const char* strchr (const char *str, int character)
+{
+	
+	while (*str != character)
+	{
+		str++;
+	}
+
+	if (*str != character)
+		return NULL;
+	else
+		return str;	
+}
 
 char* strcpy (char *dest, const char *src)
 {

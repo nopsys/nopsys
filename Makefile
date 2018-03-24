@@ -40,7 +40,7 @@ clean:
 
 .PRECIOUS: %.img
 
-.PHONY: iso
+.PHONY: libnopsys iso
 # ==================
 # real file targets
 # ==================
@@ -54,11 +54,11 @@ $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kern
 
 
 # make an iso (CD image)
-$(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub.cfg
+$(BLDDIR)/nopsys.iso: $(EXTRADIR)/SqueakNOS.image $(BLDDIR)/nopsys.kernel boot/grub.cfg
 	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
-	grub-mkrescue --xorriso=$(XORRISO_DIR)xorriso -o $(ISODIR)/nopsys.iso $(ISODIR)
+	grub-mkrescue --xorriso=$(XORRISO_DIR)xorriso -o $(BLDDIR)/nopsys.iso $(ISODIR)
 	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
 # image file for what ???
@@ -102,24 +102,24 @@ $(BLDDIR)/qemudbg:
 # system vm generation and running 
 #----------------------------------
 
-try-vmware: $(BLDDIR)/vmware.cd.vmx iso 
+try-vmware: $(BLDDIR)/vmware.cd.vmx $(BLDDIR)/nopsys.iso 
 	vmplayer $<
 #	vmware-server-console -m -x -l "`pwd`/$<"
 #	make clean
 
-try-virtualbox: iso
+try-virtualbox: $(BLDDIR)/nopsys.iso
 	scripts/virtualBox.sh
 
-try-bochs: iso $(BLDDIR)/bochsrc
+try-bochs: $(BLDDIR)/nopsys.iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg
 
-try-qemu: iso
-	qemu-system-x86_64 -boot d -cdrom $(ISODIR)/nopsys.iso -m 256
+try-qemu: $(BLDDIR)/nopsys.iso
+	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 256
 
-try-qemudbg: iso $(BLDDIR)/qemudbg
+try-qemudbg: $(BLDDIR)/nopsys.iso $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
-	cd $(BLDDIR) && setsid qemu-system-x86_64 -s -boot d -cdrom iso/nopsys.iso -m 256 &
-	sleep 4.9
+	cd $(BLDDIR) && setsid qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 256 &
+	sleep 5.5
 	cd build && gdb nopsys.kernel -x qemudbg 
 	# in gdb console you have to enter 
 

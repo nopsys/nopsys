@@ -1,7 +1,7 @@
 set history save
 set disassembly-flavor intel
 target remote localhost:1234
-set directories ../src
+directory ../src/
 b isr_0_ASM
 b isr_1_ASM
 b isr_2_ASM

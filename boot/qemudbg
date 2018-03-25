@@ -16,7 +16,6 @@ b isr_10_ASM
 b isr_11_ASM
 b isr_12_ASM
 b isr_13_ASM
-b primitivePrintString
 
 # echo "target remote | qemu-system-x86_64 -S -gdb stdio -boot d -cdrom nopsys.iso -m 256" >$@
 

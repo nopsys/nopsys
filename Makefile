@@ -96,7 +96,7 @@ $(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
 $(BLDDIR)/bochsrc : boot/bochsrc
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
 
-$(BLDDIR)/qemudbg:
+$(BLDDIR)/qemudbg: boot/qemudbg
 	cp boot/qemudbg $(BLDDIR)/	
 
 # system vm generation and running 

@@ -58,7 +58,7 @@ $(BLDDIR)/nopsys.iso: $(EXTRADIR)/SqueakNOS.image $(BLDDIR)/nopsys.kernel boot/g
 	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
-	grub-mkrescue --xorriso=$(XORRISO_DIR)xorriso -o $(BLDDIR)/nopsys.iso $(ISODIR)
+	$(MKRESCUE) --xorriso=$(XORRISO_DIR)xorriso -o $(BLDDIR)/nopsys.iso $(ISODIR)
 	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
 # image file for what ???

@@ -17,18 +17,16 @@ SCRIPT_PATH=`dirname $0`;
 ## The VM name and type
 VMNAME="CogNOS"
 OSTYPE="Other"
+ISOFILE="build/nopsys.iso"
+MEMORY="1024"  
 
 RESULT=`vboxmanage list vms | grep $VMNAME`
 if [ -z RESULT ]
 then
-    vboxmanage createvm --name $VMNAME --ostype $OSTYPE --register
+    VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register
     VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
-    VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $SCRIPT_PATH/.../$ISOFILE
+    VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $SCRIPT_PATH/../$ISOFILE
+    VBoxManage modifyvm $VMNAME --memory "$MEMORY MB"
 fi
-
-## The VM characteristics
-ISOFILE="build/nopsys.iso"
-VRAM="32"
-MEMORY="1024"  
 
 vboxmanage startvm $VMNAME 

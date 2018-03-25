@@ -25,3 +25,6 @@ CFLAGS_ARCH  = $(CFLAGS64)
 LDFLAGS_ARCH = $(LDFLAGS64)
 DEFS_ARCH    = $(DEFS64)
 
+GDB = gdb
+
+MKRESCUE = grub-mkrescue

@@ -28,3 +28,4 @@ DEFS_ARCH    = $(DEFS64)
 GDB = gdb
 
 MKRESCUE = grub-mkrescue
+SETSID = setsid

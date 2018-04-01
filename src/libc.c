@@ -121,6 +121,18 @@ void free(void *p)
 }
 
 
+long long int llabs (long long int n)
+{
+	return n >= 0 ? n : -n; 
+}
+
+void bzero(char *str, size_t n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		*str++=0;
+	}
+}
 
 
 void uitoa64 (uint64_t value, char *str_out, int base)
@@ -250,7 +262,7 @@ snprintf_impl (char *formatted, size_t max_size, const char *format, void *arg[]
 			char *p;
 			void *value = *arg;
 			bool ended = false;
-			char length = 0;
+//			char length = 0;
 
 			arg++;
 
@@ -295,7 +307,8 @@ snprintf_impl (char *formatted, size_t max_size, const char *format, void *arg[]
 					break;
 
 				case 'l':
-					length = 'l';
+// FIXME: not supported yet
+//					length = 'l';
 					break; 
 					
 

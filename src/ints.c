@@ -14,35 +14,20 @@ static idt_entry_t IDT[0x100] = { 0 };
 
 idt_descriptor_t idt_descriptor = { 0 };
 
-void isr_0_ASM();
-void isr_1_ASM();
-void isr_2_ASM();
-void isr_3_ASM();
-void isr_4_ASM();
-void isr_5_ASM();
-void isr_6_ASM();
-void isr_7_ASM();
-void isr_8_ASM();
-void isr_9_ASM();
-void isr_10_ASM();
-void isr_11_ASM();
-void isr_12_ASM();
-void isr_13_ASM();
-void isr_page_fault_ASM();
-void isr_15_ASM();
-
-void isr_clock_ASM();
 
 
-void reset_pic() {
+void setup_pic()
+{
     outb(PIC1_PORT+0, 0x11); /* IRQs edge triggered, cascade, 8086/88 mode */
     outb(PIC1_PORT+1, 0x20); /* int number (start) */
+//    outb(PIC1_PORT+1, 0x00); /* int number (start) */
     outb(PIC1_PORT+1, 0x04); /* PIC1 Master, Slave enters Int through IRQ2 */
     outb(PIC1_PORT+1, 0x01); /* Mode 8086 */
     outb(PIC1_PORT+1, 0xFF); /* Mask all! */
 
     outb(PIC2_PORT+0, 0x11); /* IRQs edge triggered, cascade, 8086/88 mode */
     outb(PIC2_PORT+1, 0x28); /* int number (start) */
+//    outb(PIC2_PORT+1, 0x08); /* int number (start) */
     outb(PIC2_PORT+1, 0x02); /* PIC2 Slave, enters Int through IRQ2 */
     outb(PIC2_PORT+1, 0x01); /* Mode 8086 */
     outb(PIC2_PORT+1, 0xFF); /* Mask all! */
@@ -82,7 +67,24 @@ void ints_init_structs()
 	set_idt(0xd, isr_13_ASM);
 	set_idt(0xf, isr_15_ASM);
 
-	reset_pic();
+	// set PIC irq handlers
+	set_idt(0x21, isr_33_ASM);
+	set_idt(0x22, isr_34_ASM);
+	set_idt(0x23, isr_35_ASM);
+	set_idt(0x24, isr_36_ASM);
+	set_idt(0x25, isr_37_ASM);
+	set_idt(0x26, isr_38_ASM);
+	set_idt(0x27, isr_39_ASM);
+	set_idt(0x28, isr_40_ASM);
+	set_idt(0x29, isr_41_ASM);
+	set_idt(0x2a, isr_42_ASM);
+	set_idt(0x2b, isr_43_ASM);
+	set_idt(0x2c, isr_44_ASM);
+	set_idt(0x2d, isr_45_ASM);
+	set_idt(0x2e, isr_46_ASM);
+	set_idt(0x2f, isr_47_ASM);
+
+	setup_pic();
 
 	// set timer frequency
 	outb(0x43, 0x34);	// timer 0, mode binary, write 16 bits count
@@ -130,30 +132,23 @@ void ints_slave_pic_int_ended()
 
 void ints_signal_master_semaphore(int number)
 {
-	//if (irq_semaphores[number] != 0)
-		semaphore_signal_with_index(irq_semaphores[number]);
-	//else
-	ints_master_pic_int_ended();
+	semaphore_signal_with_index(irq_semaphores[number-32]);
+	// interrupt end signaling is done in Smalltalk
 }
 
 
 void ints_signal_slave_semaphore(int number)
 {
-	if (irq_semaphores[number] != 0)
-		 semaphore_signal_with_index(irq_semaphores[number]);
-	else
-	{
-		//ints_slave_pic_int_ended();
-		//ints_master_pic_int_ended();
-	}
+	semaphore_signal_with_index(irq_semaphores[number-32]);
+	// interrupt end signaling is done in Smalltalk
 }
 
 void isr_clock_C() 
 {
 	timer++;
 	// *(long*)(0xfd000000+timer)=0;
-	ints_signal_master_semaphore(0);
-	//ints_master_pic_int_ended();
+	//ints_signal_master_semaphore(32);
+	ints_master_pic_int_ended();
 }
 
 #define sti()        	    __asm("sti")

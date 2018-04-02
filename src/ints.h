@@ -53,5 +53,42 @@ void set_idt(uint32_t index, void *handler);
 void ints_master_pic_int_ended();
 void ints_slave_pic_int_ended();
 
+// exceptions
+void isr_0_ASM();
+void isr_1_ASM();
+void isr_2_ASM();
+void isr_3_ASM();
+void isr_4_ASM();
+void isr_5_ASM();
+void isr_6_ASM();
+void isr_7_ASM();
+void isr_8_ASM();
+void isr_9_ASM();
+void isr_10_ASM();
+void isr_11_ASM();
+void isr_12_ASM();
+void isr_13_ASM();
+void isr_page_fault_ASM();
+void isr_15_ASM();
+
+// external interrupts (PIC)
+void isr_clock_ASM();
+void isr_33_ASM();
+void isr_34_ASM();
+void isr_35_ASM();
+void isr_36_ASM();
+void isr_37_ASM();
+void isr_38_ASM();
+void isr_39_ASM();
+void isr_40_ASM();
+void isr_41_ASM();
+void isr_42_ASM();
+void isr_43_ASM();
+void isr_44_ASM();
+void isr_45_ASM();
+void isr_46_ASM();
+void isr_47_ASM();
+
+
 #endif /* _NOPSYS_INTS_H_ */
 

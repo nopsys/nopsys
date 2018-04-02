@@ -77,9 +77,10 @@ isr_%1_ASM:
 extern %2
 	ISR_HANDLER_PROLOGUE %1
 	SAVE_CONTEXT
-	push %1
+	; push %1 ; this was for 32 bits
+	mov rdi, %1
 	call %2
-	add rsp, 8
+	; add rsp, 8 ; this was for 32 bits
 	RESTORE_CONTEXT
 	iretq	
 %endmacro
@@ -98,9 +99,11 @@ extern isr_%1_C
 	push rax
 	mov  rax, [esp+8]  ; error code
 	SAVE_CONTEXT
-	push rax
+	; push rax  ; this was for 32 bits
+	mov rdi, rax
 	call isr_%1_C
-	add rsp, 8
+	
+	; add rsp, 4 ; idem
 	RESTORE_CONTEXT
 	pop rax            ; restore eax
 	add rsp, 8         ; remove error code from tos
@@ -150,6 +153,21 @@ ISR_HANDLER_PROLOGUE clock
 	iretq
 
 DEFINE_MASTER_SEMAPHORE_ISR 33  ; keyboard
+DEFINE_MASTER_SEMAPHORE_ISR 34
+DEFINE_MASTER_SEMAPHORE_ISR 35
+DEFINE_MASTER_SEMAPHORE_ISR 36
+DEFINE_MASTER_SEMAPHORE_ISR 37
+DEFINE_MASTER_SEMAPHORE_ISR 38
+DEFINE_MASTER_SEMAPHORE_ISR 39
+
+DEFINE_SLAVE_SEMAPHORE_ISR 40
+DEFINE_SLAVE_SEMAPHORE_ISR 41
+DEFINE_SLAVE_SEMAPHORE_ISR 42
+DEFINE_SLAVE_SEMAPHORE_ISR 43
+DEFINE_SLAVE_SEMAPHORE_ISR 44
+DEFINE_SLAVE_SEMAPHORE_ISR 45
+DEFINE_SLAVE_SEMAPHORE_ISR 46
+DEFINE_SLAVE_SEMAPHORE_ISR 47
 
 DEFINE_HANDLER_NO_ERROR_CODE_STOP 0
 DEFINE_HANDLER_NO_ERROR_CODE_STOP 1

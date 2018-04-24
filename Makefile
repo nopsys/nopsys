@@ -5,7 +5,7 @@ NOPSYS_SOURCES = ../dmr/bee.bsc
 
 BLDDIR    = build
 OBJDIR    = $(BLDDIR)/objs#   temp .o files go here
-EXTRADIR  = $(VM_BUILDDIR)/extra#   files needed for execution go here (image, sources, etc)
+EXTRADIR  = $(BLDDIR)/extra#   files needed for execution go here (image, sources, etc)
 ISODIR    = $(BLDDIR)/iso#    temp dir to put everything and package as iso
 DISTRODIR = $(BLDDIR)/distro
 
@@ -51,7 +51,9 @@ $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kern
 	$(LD) -o $(BLDDIR)/nopsys.kernel $(LDFLAGS_ARCH) -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
 	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3}' > $(BLDDIR)/nopsys.sym
 
-
+$(EXTRADIR)/SqueakNOS.image:
+	mkdir $(BLDDIR)
+	../scripts/installImage.sh
 
 # make an iso (CD image)
 $(BLDDIR)/nopsys.iso: $(EXTRADIR)/SqueakNOS.image $(BLDDIR)/nopsys.kernel boot/grub.cfg

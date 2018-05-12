@@ -51,12 +51,13 @@ $(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kern
 	$(LD) -o $(BLDDIR)/nopsys.kernel $(LDFLAGS_ARCH) -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
 	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3}' > $(BLDDIR)/nopsys.sym
 
-$(EXTRADIR)/SqueakNOS.image:
-	mkdir $(BLDDIR)
-	../scripts/installImage.sh
+EXTRAS = $(wildcard $(VM_BUILDDIR)/extra/*)
+$(EXTRADIR): $(EXTRAS)
+	mkdir -p $@
+	cp -r $? $@
 
 # make an iso (CD image)
-$(BLDDIR)/nopsys.iso: $(EXTRADIR)/SqueakNOS.image $(BLDDIR)/nopsys.kernel boot/grub.cfg
+$(BLDDIR)/nopsys.iso: $(EXTRADIR) $(BLDDIR)/nopsys.kernel boot/grub.cfg
 	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/

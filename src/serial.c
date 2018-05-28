@@ -77,13 +77,18 @@ int serial_is_transmit_empty()
  
 void serial_write(uchar a)
 {
-   // separate in two 4 bit sends because it doesn't seem to be able to send 8 bits at once
    while (serial_is_transmit_empty() == 0);
-   outb(PORT, a & 0x0F);
+   outb(PORT, a);
    
-   while (serial_is_transmit_empty() == 0);
-   outb(PORT, (a>>4) & 0x0F);
+   //we used to separate in two 4 bit sends because it didn't seem
+   // to be able to send 8 bits at once:
 
+   //while (serial_is_transmit_empty() == 0);
+   //outb(PORT, a & 0x0F);
+   
+   //while (serial_is_transmit_empty() == 0);
+   //outb(PORT, (a>>4) & 0x0F);
+ 
 }
 
 

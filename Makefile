@@ -111,7 +111,7 @@ try-vmware: $(BLDDIR)/vmware.cd.vmx $(BLDDIR)/nopsys.iso
 #	make clean
 
 try-virtualbox: $(BLDDIR)/nopsys.iso
-	scripts/virtualBox.sh
+	scripts/virtualbox.sh
 
 try-bochs: $(BLDDIR)/nopsys.iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg
@@ -122,7 +122,7 @@ try-qemu: $(BLDDIR)/nopsys.iso
 try-qemudbg: $(BLDDIR)/nopsys.iso $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
 	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 512 &
-	sleep 2
+	sleep 6
 	cd build && $(GDB) nopsys.kernel -x qemudbg 
 	# in gdb console you have to enter 
 

@@ -27,6 +27,8 @@ global enable_long_mode
 
 %define ALIGN align 16 ;   as ".align 16"
 
+error_msg : db "Exception! %d", 10, 0
+
 %macro PUSH_ALL_REGS 0
 ;	push es
 ;	push ds
@@ -114,6 +116,12 @@ extern isr_%1_C
 %macro DEFINE_HANDLER_NO_ERROR_CODE_STOP 1 ; arg: isr nameAddress
 	ISR_HANDLER_PROLOGUE %1
 	mov rax, %1
+
+	mov rax, 0
+	mov rdi, error_msg
+	mov rsi, %1
+	call printf
+
 	xchg bx, bx
 	jmp $
 	jmp [esp]
@@ -130,6 +138,12 @@ extern isr_%1_C
 	;add esp, 8    ; idem prev but using iret. remove error code and iret
 	;iret
 	mov rax, %1
+
+	mov rax, 0
+	mov rdi, error_msg
+	mov rsi, %1
+	call printf
+
 	jmp isr_handler_common_stop
 %endmacro
 

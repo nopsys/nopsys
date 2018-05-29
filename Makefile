@@ -18,9 +18,7 @@ LD = $(COMPILER_DIR)$(LINKER_PREFIX)
 # pseudo targets
 # ==============
 
-# from src dir generate a small generic lib, that later has to be linked to whatever dialect/vm is used
-libnopsys: .ensure_dirs
-	make -C src
+libnopsys: $(BLDDIR)/libnopsys.obj
 
 all: iso
 
@@ -35,8 +33,6 @@ distro: iso
 clean:
 	rm -rf $(BLDDIR) # -rm -rf $(BLDDIR)
 
-.ensure_dirs:
-	mkdir -p $(BLDDIR) $(ISODIR) $(ISODIR)/boot/grub $(DISTRODIR) $(OBJDIR)
 
 .PRECIOUS: %.img
 
@@ -44,20 +40,25 @@ clean:
 # ==================
 # real file targets
 # ==================
+$(BLDDIR):
+	mkdir -p $(BLDDIR) $(ISODIR) $(ISODIR)/boot/grub $(DISTRODIR) $(OBJDIR)
+
+# from src dir generate a small generic lib, that later has to be linked to whatever dialect/vm is used
+$(BLDDIR)/libnopsys.obj: $(BLDDIR)
+	make -C src
 
 # object file to be loaded by grub, your dialect should have generated a vm.obj file and put in BLDDIR 
-$(BLDDIR)/nopsys.kernel: libnopsys $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kernel.ld
+$(BLDDIR)/nopsys.kernel: $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj boot/loader.s boot/kernel.ld
 	$(AS) -o $(BLDDIR)/loader.o $(ASFLAGS_ARCH) boot/loader.s
 	$(LD) -o $(BLDDIR)/nopsys.kernel $(LDFLAGS_ARCH) -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
 	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3}' > $(BLDDIR)/nopsys.sym
 
-EXTRAS = $(wildcard $(VM_BUILDDIR)/extra/*)
-$(EXTRADIR): $(EXTRAS)
+$(EXTRADIR): $(VM_BUILDDIR)/extra
 	mkdir -p $@
-	cp -r $? $@
+	cp -r $(wildcard $(VM_BUILDDIR)/extra/*) $@
 
 # make an iso (CD image)
-$(BLDDIR)/nopsys.iso: $(EXTRADIR) $(BLDDIR)/nopsys.kernel boot/grub.cfg
+$(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub.cfg $(EXTRADIR)
 	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
 	cp $(EXTRADIR)/* $(ISODIR)/
 	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/

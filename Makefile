@@ -24,6 +24,8 @@ all: iso
 
 iso: $(BLDDIR)/nopsys.iso
 
+hd: $(BLDDIR)/nopsys.vmdk
+
 # generate a zip with all the current files, that can both be used to run or rebuild this nopsys
 distro: iso
 	rsync -a --exclude=.git --exclude=$(DISTRODIR) . $(DISTRODIR)   # is second exclude needed?
@@ -41,7 +43,7 @@ clean:
 # real file targets
 # ==================
 $(BLDDIR):
-	mkdir -p $(BLDDIR) $(ISODIR) $(ISODIR)/boot/grub $(DISTRODIR) $(OBJDIR)
+	mkdir -p $(BLDDIR) $(BLDDIR)/mount $(ISODIR) $(ISODIR)/boot/grub $(DISTRODIR) $(OBJDIR)
 
 # from src dir generate a small generic lib, that later has to be linked to whatever dialect/vm is used
 $(BLDDIR)/libnopsys.obj: $(BLDDIR)
@@ -65,15 +67,20 @@ $(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub.cfg $(EXTRADIR)
 	$(MKRESCUE) --xorriso=$(XORRISO_DIR)xorriso -o $(BLDDIR)/nopsys.iso $(ISODIR)
 	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
-# image file for what ???
-$(BLDDIR)/nopsys.img: %.kernel $(FLOPPY)
-	cp $(FLOPPY) $(img)
-	mkdir $(mnt)
-	sudo mount -o loop $(img) $(mnt)
-	sudo cp $< $(mnt)/boot/kernel
-	sudo umount $(mnt)
-	rmdir $(mnt)
-	mv $(img) $@
+# make a hard-disk image file
+$(BLDDIR)/nopsys.vmdk: $(BLDDIR)/nopsys.iso
+	bash -x ./scripts/create-fat32.sh 100 $(BLDDIR)/iso $(BLDDIR)/nopsys.raw
+	export LOOP_DEVICE1=`sudo losetup -f` &&\
+	sudo losetup $$LOOP_DEVICE1 $(BLDDIR)/nopsys.raw &&\
+	export LOOP_DEVICE2=`sudo losetup -f` &&\
+	export OFFSET=`parted $(BLDDIR)/nopsys.raw unit b print | tail -2 | head -1 | cut -f 1 --delimit="B" | cut -c 9-` &&\
+	sudo losetup $$LOOP_DEVICE2 $(BLDDIR)/nopsys.raw -o $$OFFSET &&\
+	sudo mount -t vfat $$LOOP_DEVICE2 $(BLDDIR)/mount/ &&\
+	sudo grub-install --target=i386-pc --no-floppy --boot-directory=$(BLDDIR)/mount/boot/ --modules="normal part_msdos fat multiboot" $$LOOP_DEVICE1 &&\
+	sudo umount $(BLDDIR)/mount &&\
+	sudo losetup -d $$LOOP_DEVICE2 &&\
+	sudo losetup -d $$LOOP_DEVICE1
+	qemu-img convert -f raw $(BLDDIR)/nopsys.raw -O vmdk $(BLDDIR)/nopsys.vmdk
 
 
 ccred=@echo -n "\033[0;31m"
@@ -111,21 +118,39 @@ try-vmware: $(BLDDIR)/vmware.cd.vmx $(BLDDIR)/nopsys.iso
 #	vmware-server-console -m -x -l "`pwd`/$<"
 #	make clean
 
-try-virtualbox: $(BLDDIR)/nopsys.iso
-	scripts/virtualbox.sh
+try-virtualbox: try-virtualbox-$(STORAGE)
+
+try-virtualbox-iso: $(BLDDIR)/nopsys.iso
+	scripts/virtualbox.sh iso
+
+try-virtualbox-hd: $(BLDDIR)/nopsys.vmdk
+	scripts/virtualbox.sh hd
 
 try-bochs: $(BLDDIR)/nopsys.iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg
 
-try-qemu: $(BLDDIR)/nopsys.iso
+
+try-qemu: try-qemu-$(STORAGE)
+
+try-qemu-iso: $(BLDDIR)/nopsys.iso
 	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 512
 
-try-qemudbg: $(BLDDIR)/nopsys.iso $(BLDDIR)/qemudbg
+try-qemu-hd: $(BLDDIR)/nopsys.vmdk
+	qemu-system-x86_64 -boot d -hda $(BLDDIR)/nopsys.vmdk -m 512
+
+
+try-qemudbg: try-qemudbg-$(STORAGE)
+
+try-qemudbg-iso: $(BLDDIR)/nopsys.iso $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
 	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 512 &
 	sleep 6
-	cd build && $(GDB) nopsys.kernel -x qemudbg 
-	# in gdb console you have to enter 
+	cd build && $(GDB) nopsys.kernel -x qemudbg
 
+try-qemudbg-hd: $(BLDDIR)/nopsys.vmdk $(BLDDIR)/qemudbg
+	# use setsid so that ctrl+c in gdb doesn't kill qemu
+	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -hda nopsys.vmdk -m 512 &
+	sleep 6
+	cd build && $(GDB) nopsys.kernel -x qemudbg
 
 

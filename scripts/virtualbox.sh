@@ -15,17 +15,28 @@ SCRIPT_PATH=`dirname $0`;
 #######################################################################
 
 ## The VM name and type
-VMNAME="CogNOS"
+STORAGE=iso
+if [ ! -z "$1" ]; then
+	STORAGE=$1
+fi
+
+VMNAME="CogNOS"-$STORAGE
 OSTYPE="Other_64"
 ISOFILE="build/nopsys.iso"
+HDFILE="build/nopsys.vmdk"
 MEMORY=1024
 
 RESULT=`vboxmanage list vms | grep $VMNAME`
 if [ -z "$RESULT" ]
 then
-    VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register
-    VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
-    VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $SCRIPT_PATH/../$ISOFILE
-    VBoxManage modifyvm $VMNAME --memory $MEMORY
+	VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register
+	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
+	if [ $STORAGE = "iso" ]; then
+		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $SCRIPT_PATH/../$ISOFILE
+	else
+		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium $SCRIPT_PATH/../$HDFILE
+	fi
+	VBoxManage modifyvm $VMNAME --memory $MEMORY
 fi
-vboxmanage startvm $VMNAME 
+vboxmanage startvm $VMNAME
+

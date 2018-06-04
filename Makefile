@@ -102,7 +102,7 @@ $(VM_BUILDDIR)/vm.obj:
 $(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
 	cp boot/vmx.cd.template $@
 	chmod +x $@
-	echo 'ide0:0.fileName = "iso/$*.iso"' >> $@
+	echo 'ide0:0.fileName = nopsys.iso' >> $@
 
 $(BLDDIR)/bochsrc : boot/bochsrc
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/

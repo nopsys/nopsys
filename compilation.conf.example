@@ -1,6 +1,11 @@
 COMPILER_DIR = 
-COMPILER_PREFIX = gcc
-LINKER_PREFIX = ld
+COMPILER_PREFIX = 
+
+CC=$(COMPILER_DIR)$(COMPILER_PREFIX)gcc
+AR=$(COMPILER_DIR)$(COMPILER_PREFIX)ar
+AS=$(COMPILER_DIR)$(COMPILER_PREFIX)as
+LD=$(COMPILER_DIR)$(COMPILER_PREFIX)ld
+
 
 # only needed if you have a xorriso installed non system-wide (don't forget the / at the end)
 XORRISO_DIR = /usr/bin/

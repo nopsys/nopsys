@@ -1,10 +1,7 @@
 include ../compilation.conf
 
-AR = $(COMPILER_DIR)$(COMPILER_PREFIX)-ar
 CP = cp
 RM = rm
-LD = $(COMPILER_DIR)$(LINKER_PREFIX)
-CC = $(COMPILER_DIR)$(COMPILER_PREFIX)
 
 CFLAGS  = $(CFLAGS_ARCH) -std=c11 -Wall --no-pie -ffreestanding -nostdlib -fno-stack-protector -g -O1 -fno-inline -fno-omit-frame-pointer
 LDFLAGS = $(LDFLAGS_ARCH) -static -nostdlib -r #-Xlinker

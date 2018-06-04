@@ -5,9 +5,13 @@ NOPSYS_SOURCES = ../dmr/bee.bsc
 
 BLDDIR    = build
 OBJDIR    = $(BLDDIR)/objs#   temp .o files go here
-EXTRADIR  = $(BLDDIR)/extra#   files needed for execution go here (image, sources, etc)
-ISODIR    = $(BLDDIR)/iso#    temp dir to put everything and package as iso
+DISKDIR    = $(BLDDIR)/disk#    temp dir to put everything and package as image file
 DISTRODIR = $(BLDDIR)/distro
+
+ifneq ("$(wildcard  $(VM_BUILDDIR)/extra-files)","")
+EXTRAFILES=$(shell cat $(VM_BUILDDIR)/extra-files)
+endif
+DESTFILES = $(addprefix $(notdir $(EXTRAFILES)),$(DISKDIR)/)
 
 -include vm.conf # '-include' doesn't fail if the file doesn't exist
 
@@ -40,7 +44,7 @@ clean:
 # real file targets
 # ==================
 $(BLDDIR):
-	mkdir -p $(BLDDIR) $(BLDDIR)/mount $(ISODIR) $(ISODIR)/boot/grub $(DISTRODIR) $(OBJDIR)
+	mkdir -p $(BLDDIR) $(BLDDIR)/mount $(DISKDIR) $(DISKDIR)/boot/grub $(DISTRODIR) $(OBJDIR)
 
 # from src dir generate a small generic lib, that later has to be linked to whatever dialect/vm is used
 $(BLDDIR)/libnopsys.obj: $(BLDDIR)
@@ -52,21 +56,25 @@ $(BLDDIR)/nopsys.kernel: $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj boot/load
 	$(LD) -o $(BLDDIR)/nopsys.kernel $(LDFLAGS_ARCH) -T boot/kernel.ld $(BLDDIR)/loader.o $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj
 	nm $(BLDDIR)/nopsys.kernel | grep -v " U " | awk '{print "0x" $$1 " " $$3}' > $(BLDDIR)/nopsys.sym
 
-$(EXTRADIR): $(VM_BUILDDIR)/extra
-	mkdir -p $@
-	cp -r $(wildcard $(VM_BUILDDIR)/extra/*) $@
 
+
+$(DESTFILES): $(EXTRAFILES)
+	cp -u $? $(DISKDIR)/
+
+#vpath $(EXTRADIRS)
+
+$(BLDDIR)/disk: $(BLDDIR)/nopsys.kernel boot/grub.cfg $(DESTFILES)
+	cp -r boot/grub.cfg $(DISKDIR)/boot/grub/
+	cp $(BLDDIR)/nopsys.kernel $(DISKDIR)/
+	
 # make an iso (CD image)
-$(BLDDIR)/nopsys.iso: $(BLDDIR)/nopsys.kernel boot/grub.cfg $(EXTRADIR)
-	cp -r boot/grub.cfg $(ISODIR)/boot/grub/
-	cp $(EXTRADIR)/* $(ISODIR)/
-	cp $(BLDDIR)/nopsys.kernel $(ISODIR)/
-	$(MKRESCUE) --xorriso=$(XORRISO_DIR)xorriso -o $(BLDDIR)/nopsys.iso $(ISODIR)
+$(BLDDIR)/nopsys.iso: $(BLDDIR)/disk
+	$(MKRESCUE) --xorriso=$(XORRISO_DIR)xorriso -o $(BLDDIR)/nopsys.iso $(DISKDIR)
 	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
 # make a hard-disk image file
-$(BLDDIR)/nopsys.vmdk: $(BLDDIR)/nopsys.iso
-	bash -x ./scripts/create-fat32.sh 100 $(BLDDIR)/iso $(BLDDIR)/nopsys.raw
+$(BLDDIR)/nopsys.vmdk: $(BLDDIR)/disk
+	bash -x ./scripts/create-fat32.sh 100 $(BLDDIR)/disk $(BLDDIR)/nopsys.raw
 	export LOOP_DEVICE1=`sudo losetup -f` &&\
 	sudo losetup $$LOOP_DEVICE1 $(BLDDIR)/nopsys.raw &&\
 	export LOOP_DEVICE2=`sudo losetup -f` &&\

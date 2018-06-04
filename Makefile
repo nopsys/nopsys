@@ -11,7 +11,7 @@ DISTRODIR = $(BLDDIR)/distro
 ifneq ("$(wildcard  $(VM_BUILDDIR)/extra-files)","")
 EXTRAFILES=$(shell cat $(VM_BUILDDIR)/extra-files)
 endif
-DESTFILES = $(addprefix $(notdir $(EXTRAFILES)),$(DISKDIR)/)
+DESTFILES = $(addprefix $(DISKDIR)/,$(notdir $(EXTRAFILES)))
 
 -include vm.conf # '-include' doesn't fail if the file doesn't exist
 
@@ -36,10 +36,8 @@ distro: iso
 clean:
 	rm -rf $(BLDDIR) # -rm -rf $(BLDDIR)
 
+.PHONY: libnopsys
 
-.PRECIOUS: %.img
-
-.PHONY: libnopsys iso
 # ==================
 # real file targets
 # ==================
@@ -66,6 +64,7 @@ $(DESTFILES): $(EXTRAFILES)
 $(BLDDIR)/disk: $(BLDDIR)/nopsys.kernel boot/grub.cfg $(DESTFILES)
 	cp -r boot/grub.cfg $(DISKDIR)/boot/grub/
 	cp $(BLDDIR)/nopsys.kernel $(DISKDIR)/
+	touch $(DISKDIR) # nopsys.iso doesn't rebuild without this, why?
 	
 # make an iso (CD image)
 $(BLDDIR)/nopsys.iso: $(BLDDIR)/disk
@@ -103,6 +102,9 @@ $(VM_BUILDDIR)/vm.obj:
 	@echo "------------"
 	@exit 1
 	
+#----------------------------------
+# system vm generation
+#----------------------------------
 
 $(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
 	cp boot/vmx.cd.template $@
@@ -115,7 +117,8 @@ $(BLDDIR)/bochsrc : boot/bochsrc
 $(BLDDIR)/qemudbg: boot/qemudbg
 	cp boot/qemudbg $(BLDDIR)/	
 
-# system vm generation and running 
+#----------------------------------
+# system vm running 
 #----------------------------------
 
 try-vmware: $(BLDDIR)/vmware.cd.vmx $(BLDDIR)/nopsys.iso 

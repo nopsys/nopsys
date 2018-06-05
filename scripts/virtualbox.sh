@@ -20,11 +20,20 @@ if [ ! -z "$1" ]; then
 	STORAGE=$1
 fi
 
-VMNAME="CogNOS"-$STORAGE
+RELEASE=${RELEASE:-debug}
+
+VMNAME="CogNOS"-$STORAGE-$RELEASE
 OSTYPE="Other_64"
-ISOFILE="build/nopsys.iso"
-HDFILE="build/nopsys.vmdk"
+ISOFILE="nopsys.iso"
+HDFILE="nopsys.vmdk"
 MEMORY=1024
+
+if [ $RELEASE = "debug" ]; then
+	RUN_PATH=$SCRIPT_PATH/../build/
+	echo path is $RUN_PATH
+else
+    RUN_PATH = .
+fi
 
 RESULT=`vboxmanage list vms | grep $VMNAME`
 if [ -z "$RESULT" ]
@@ -32,9 +41,9 @@ then
 	VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register
 	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
 	if [ $STORAGE = "iso" ]; then
-		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $SCRIPT_PATH/../$ISOFILE
+		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $RUN_PATH/$ISOFILE
 	else
-		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium $SCRIPT_PATH/../$HDFILE
+		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium $RUN_PATH/$HDFILE
 	fi
 	VBoxManage modifyvm $VMNAME --memory $MEMORY
 fi

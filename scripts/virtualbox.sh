@@ -32,7 +32,7 @@ if [ $RELEASE = "debug" ]; then
 	RUN_PATH=$SCRIPT_PATH/../build/
 	echo path is $RUN_PATH
 else
-    RUN_PATH = .
+    RUN_PATH=.
 fi
 
 RESULT=`vboxmanage list vms | grep $VMNAME`

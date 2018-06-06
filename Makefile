@@ -73,7 +73,7 @@ $(BLDDIR)/nopsys.iso: $(BLDDIR)/disk
 
 # make a hard-disk image file
 $(BLDDIR)/nopsys.vmdk: $(BLDDIR)/disk
-	bash -x ./scripts/create-fat32.sh 100 $(BLDDIR)/disk $(BLDDIR)/nopsys.raw
+	bash -x ./scripts/create-fat32.sh 200 $(BLDDIR)/disk $(BLDDIR)/nopsys.raw
 	export LOOP_DEVICE1=`sudo losetup -f` &&\
 	sudo losetup $$LOOP_DEVICE1 $(BLDDIR)/nopsys.raw &&\
 	export LOOP_DEVICE2=`sudo losetup -f` &&\

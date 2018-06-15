@@ -57,7 +57,7 @@ $(BLDDIR)/nopsys.kernel: $(BLDDIR)/libnopsys.obj $(VM_BUILDDIR)/vm.obj boot/load
 
 
 $(DESTFILES): $(EXTRAFILES)
-	cp -u $? $(DISKDIR)/
+	cp $? $(DISKDIR)/
 
 #vpath $(EXTRADIRS)
 

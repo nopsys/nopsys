@@ -46,6 +46,10 @@ then
 		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium $RUN_PATH/$HDFILE
 	fi
 	VBoxManage modifyvm $VMNAME --memory $MEMORY
+	"Enable serial port"
+	VBoxManage modifyvm $VMNAME --uart1 0x3F8 4
+	FILENAME=$(pwd)/../../../SmalltalkPerformance/resultsFromCogNOS.txt
+	VBoxManage modifyvm $VMNAME --uartmode1 file $FILENAME
 fi
-vboxmanage startvm $VMNAME
 
+vboxmanage startvm $VMNAME

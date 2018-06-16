@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/bash -x
+
 SCRIPT_PATH=`dirname $0`;
 #######################################################################
 #                                                                     #
@@ -39,17 +40,22 @@ RESULT=`vboxmanage list vms | grep $VMNAME`
 if [ -z "$RESULT" ]
 then
 	VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register
-	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
-	if [ $STORAGE = "iso" ]; then
-		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $RUN_PATH/$ISOFILE
-	else
-		VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium $RUN_PATH/$HDFILE
-	fi
 	VBoxManage modifyvm $VMNAME --memory $MEMORY
 	"Enable serial port"
 	VBoxManage modifyvm $VMNAME --uart1 0x3F8 4
 	FILENAME=$(pwd)/../../../SmalltalkPerformance/resultsFromCogNOS.txt
 	VBoxManage modifyvm $VMNAME --uartmode1 file $FILENAME
+	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
+fi
+
+if [ $STORAGE = "iso" ]; then
+	VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $RUN_PATH/$ISOFILE
+else
+	VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium $RUN_PATH/$HDFILE
+	ABSOLUTE_PATH="$(cd $(dirname $RUN_PATH/$HDFILE); pwd)/$(basename $RUN_PATH/$HDFILE)"
+	UUID=`VBoxManage list hdds | grep -B 4 $ABSOLUTE_PATH | grep "^UUID" | cut -d: -f 2 | xargs`
+	VBoxManage internalcommands sethduuid $RUN_PATH/$HDFILE $UUID
 fi
 
 vboxmanage startvm $VMNAME
+

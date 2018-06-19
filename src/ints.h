@@ -3,10 +3,15 @@
 
 #include "types.h"
 
+#define PIT_FREQ_HZ_INT   4772727/4      // the hardware native freq 
+#define PIT_FREQ_HZ_FLOAT 4772727/4.0
 
-#define REAL_TIMER_FREQUENCY	2000
-#define TIMER_DIVISOR	((int)(4772727/4/REAL_TIMER_FREQUENCY+1))
-#define TIMER_FREQUENCY	(4772727.0/4/TIMER_DIVISOR)
+// Math:
+// PIT_FREQ_HZ / aDivisor = desired_freq. => PIT_FREQ / desired_freq = aDivisor 
+
+#define TIMER_DESIRED_INT_FREQ_HZ	2000  // 0.5 msecs
+#define TIMER_DIVISOR	((int)(PIT_FREQ_HZ_INT   / TIMER_DESIRED_INT_FREQ_HZ+1))
+#define TIMER_FREQ_HZ	      (PIT_FREQ_HZ_FLOAT / TIMER_DIVISOR)
 
 #define IRQ_NONE	    0x00
 #define IRQ_TIMER	    0x01
@@ -46,6 +51,12 @@ typedef struct idt_entry_t {
 typedef int irq_semaphores_t[16];
 
 extern irq_semaphores_t irq_semaphores;
+
+extern volatile uint64_t nopsys_ticks;
+
+extern uint64_t nopsys_tsc_freq;
+
+uint64_t get_tsc();
 
 void isr_void();
 void set_idt(uint32_t index, void *handler);

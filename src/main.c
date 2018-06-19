@@ -29,6 +29,7 @@ void nopsys_main (ulong magic, multiboot_info_t *mbi)
 	breakpoint();
 	ints_init();
 	enable_sse();
+	detect_tsc_frequency();
 
 	//if (computer->image)
 	{

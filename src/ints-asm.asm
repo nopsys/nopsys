@@ -13,6 +13,7 @@ extern snprintf_args
 
 global get_CS
 global get_CR2
+global get_tsc
 global enable_paging_using
 global enable_sse
 global inb
@@ -233,6 +234,12 @@ get_CR2:
 	mov rax, cr2
 	ret
 
+get_tsc:
+	xor rax, rax
+	rdtsc
+	shl rdx, 32
+	add rax, rdx
+	ret
 
 enable_sse:
 	mov rax, cr0
@@ -243,6 +250,44 @@ enable_sse:
 	or  rax, 3 << 9		;set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
 	mov cr4, rax
 	ret
+
+
+global measure_tsc_per_pit_interrupt
+extern nopsys_ticks
+
+;uint64_t measure_tsc_per_pit_interrupt
+measure_tsc_per_pit_interrupt:
+	push rbp
+	mov rbp, rsp
+	
+	xor rax, rax
+	mov rcx, [nopsys_ticks]
+
+.wait_loop1:
+	cmp rcx, [nopsys_ticks]  ;do nothing until the tick counter is increased
+	je .wait_loop1	
+
+	rdtsc
+	shl rdx, 32
+	add rax, rdx
+	mov r11, rax
+	
+	xor rax, rax
+	mov rcx, [nopsys_ticks]
+
+.wait_loop2:
+	cmp rcx, [nopsys_ticks]  ;do nothing until the tick counter is increased
+	je .wait_loop2	
+
+	rdtsc
+	shl rdx, 32
+	add rax, rdx
+	
+	sub rax, r11
+	
+	pop rbp
+	ret
+
 
 
 inb:   ; uint8_t inb(uint16_t port)

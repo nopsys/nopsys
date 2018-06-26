@@ -62,5 +62,9 @@ sound.autodetect = "true"
 sound.virtualDev = "es1371"
 #sound.virtualDev "sb16"
 
+# to debug remotely with gdb connect to localhost:8864
+debugStub.listen.guest64 = "TRUE"
+
 ide0:0.present = "TRUE"
-ide0:0.deviceType = "cdrom-image"
+#ide0:0.deviceType = "cdrom-image"
+

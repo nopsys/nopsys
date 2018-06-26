@@ -17,7 +17,9 @@ NASM = nasm
 NASMFLAGS64 = -f elf64
 
 CFLAGS32 = -m32
-CFLAGS64 = -m64 -mno-red-zone
+CFLAGS64 = -m64 
+#-m64 -mno-red-zone
+
 
 LDFLAGS32 = -melf_i386
 LDFLAGS64 = -melf_x86_64

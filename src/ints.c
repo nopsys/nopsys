@@ -135,15 +135,30 @@ void ints_slave_pic_int_ended()
 
 void ints_signal_master_semaphore(int number)
 {
-	semaphore_signal_with_index(irq_semaphores[number-32]);
-	// interrupt end signaling is done in Smalltalk
+//	if (number != 33)
+//		printf("interrupt %d\n", number);
+	
+	int semaphore = irq_semaphores[number-32];
+	if (semaphore != 0)
+		semaphore_signal_with_index(semaphore); // interrupt end signaling is done in Smalltalk
+	else
+		ints_master_pic_int_ended();
 }
 
 
 void ints_signal_slave_semaphore(int number)
 {
-	semaphore_signal_with_index(irq_semaphores[number-32]);
-	// interrupt end signaling is done in Smalltalk
+//	if (number != 44)
+//		printf("interrupt %d\n", number);
+	
+	int semaphore = irq_semaphores[number-32];
+	if (semaphore != 0)
+		semaphore_signal_with_index(semaphore); // interrupt end signaling is done in Smalltalk
+	else
+	{
+		ints_slave_pic_int_ended();
+		ints_master_pic_int_ended();
+	}
 }
 
 void isr_clock_C() 
@@ -157,7 +172,6 @@ uint64_t measure_tsc_per_pit_interrupt();
 void detect_tsc_frequency()
 {
 	size_t MEASURES = 101;
-	uint64_t accum = 0;
 	uint64_t all[MEASURES];
 	
 	for (int i = 0; i < MEASURES; i++)

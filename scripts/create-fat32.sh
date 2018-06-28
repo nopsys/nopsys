@@ -36,12 +36,26 @@ mkfs.fat -F 32 $imageFile-partition                 # make fat32 filesystem on p
 
 mcopy -s -i $imageFile-partition $contents/* ::
 
+if [ ! -d "fileBenchData" ]
+then
+	mkdir "fileBenchData"
+fi
+pushd "fileBenchData"    
+for ((i=1;i<=100;i++));
+do
+	echo $i > "$i.data"
+done
+popd > /dev/null
+
+mcopy -s -i $imageFile-partition "fileBenchData" ::
+
 #sudo mount -o loop $imageFile-partition build/mount/
 #cp -r $contents build/mount
 #sudo umount build/mount
 
 offset=`parted $imageFile unit b print | tail -2 | head -1 | cut -f 1 --delimit="B" | cut -c 9-`
 echo partition offset is $offset
+
 
 dd if=$imageFile-partition of=$imageFile bs=512 seek=$(($offset/512))
 rm $imageFile-partition

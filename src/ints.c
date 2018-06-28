@@ -6,7 +6,10 @@
 #define PIC1_PORT 0x20
 #define PIC2_PORT 0xA0
 
-volatile ulong timer = 0;
+volatile
+uint64_t nopsys_ticks = 0;    // low freq timer tics
+
+uint64_t nopsys_tsc_freq = 0; // high freq timer frequency
 
 irq_semaphores_t irq_semaphores;
 
@@ -132,23 +135,72 @@ void ints_slave_pic_int_ended()
 
 void ints_signal_master_semaphore(int number)
 {
-	semaphore_signal_with_index(irq_semaphores[number-32]);
-	// interrupt end signaling is done in Smalltalk
+//	if (number != 33)
+//		printf("interrupt %d\n", number);
+	
+	int semaphore = irq_semaphores[number-32];
+	if (semaphore != 0)
+		semaphore_signal_with_index(semaphore); // interrupt end signaling is done in Smalltalk
+	else
+		ints_master_pic_int_ended();
 }
 
 
 void ints_signal_slave_semaphore(int number)
 {
-	semaphore_signal_with_index(irq_semaphores[number-32]);
-	// interrupt end signaling is done in Smalltalk
+//	if (number != 44)
+//		printf("interrupt %d\n", number);
+	
+	int semaphore = irq_semaphores[number-32];
+	if (semaphore != 0)
+		semaphore_signal_with_index(semaphore); // interrupt end signaling is done in Smalltalk
+	else
+	{
+		ints_slave_pic_int_ended();
+		ints_master_pic_int_ended();
+	}
 }
 
 void isr_clock_C() 
 {
-	timer++;
-	// *(long*)(0xfd000000+timer)=0;
-	//ints_signal_master_semaphore(32);
+	nopsys_ticks++;
 	ints_master_pic_int_ended();
+}
+
+uint64_t measure_tsc_per_pit_interrupt();
+
+void detect_tsc_frequency()
+{
+	size_t MEASURES = 101;
+	uint64_t all[MEASURES];
+	
+	for (int i = 0; i < MEASURES; i++)
+	{
+		all[i] = measure_tsc_per_pit_interrupt();
+	}
+	
+	// sort, to get median
+	for (int i = 0; i < MEASURES; i++)
+	{
+		for (int j = 0; j < MEASURES; j++)
+		{
+			if (all[i] > all[j])
+			{
+				uint64_t temp = all[i];
+				all[i] = all[j];
+				all[j] = temp;
+			}
+		}
+	}
+		
+	// measured tsc ticks equal = 1 PIT tick (which is 1 / TIMER_FREQ_HZ, or 0.5ms)
+	// then 1 tsc tick equals 1 / (TIMER_FREQ_HZ * measured_tsc)
+
+	uint64_t median = all[MEASURES / 2] * TIMER_FREQ_HZ;
+	//uint64_t mhz = median / 1000000;
+	//printf("tsc frequency is %dMHz\n", mhz );
+
+	nopsys_tsc_freq = median;	
 }
 
 #define sti()        	    __asm("sti")

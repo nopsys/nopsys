@@ -109,7 +109,7 @@ $(VM_BUILDDIR)/vm.obj:
 $(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
 	cp boot/vmx.cd.template $@
 	chmod +x $@
-	echo 'ide0:0.fileName = nopsys.iso' >> $@
+	echo 'ide0:0.fileName = nopsys.vmdk' >> $@
 
 $(BLDDIR)/bochsrc : boot/bochsrc
 	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
@@ -158,7 +158,7 @@ try-qemudbg-iso: $(BLDDIR)/nopsys.iso $(BLDDIR)/qemudbg
 try-qemudbg-hd: $(BLDDIR)/nopsys.vmdk $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
 	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -hda nopsys.vmdk -m 512 &
-	sleep 6
+	sleep 14
 	cd build && $(GDB) nopsys.kernel -x qemudbg
 
 

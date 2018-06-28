@@ -13,8 +13,8 @@ computer_t* current_computer()
 
 uint64_t current_microseconds(void)
 {
-	extern unsigned long timer;
-	return timer * 1000.0 / TIMER_FREQUENCY;
+	//FIXME: These are milliseconds, not micro
+	return nopsys_ticks * 1000.0 / TIMER_FREQ_HZ;
 }
 
 

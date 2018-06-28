@@ -14,8 +14,6 @@
  *  Basic stuff related to memory management (paging)
 **/
 
-extern ulong tabs;
-
 // we add 1024 extra so we can get aligned to 1024 blocks
 // returns a pointer to an array of 1024 page directory entries
 

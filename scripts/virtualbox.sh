@@ -43,7 +43,7 @@ then
 	VBoxManage modifyvm $VMNAME --memory $MEMORY
 	"Enable serial port"
 	VBoxManage modifyvm $VMNAME --uart1 0x3F8 4
-	FILENAME=$(pwd)/../../../SmalltalkPerformance/resultsFromCogNOS.txt
+	FILENAME=$(pwd)/../../../Performance/resultsFromCogNOS.txt
 	VBoxManage modifyvm $VMNAME --uartmode1 file $FILENAME
 	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
 fi

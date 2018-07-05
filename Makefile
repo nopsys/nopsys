@@ -141,23 +141,23 @@ try-bochs: $(BLDDIR)/nopsys.iso $(BLDDIR)/bochsrc
 try-qemu: try-qemu-$(STORAGE)
 
 try-qemu-iso: $(BLDDIR)/nopsys.iso
-	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 512
+	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 512 -enable-kvm
 
 try-qemu-hd: $(BLDDIR)/nopsys.vmdk
-	qemu-system-x86_64 -boot d -hda $(BLDDIR)/nopsys.vmdk -m 512
+	qemu-system-x86_64 -boot d -hda $(BLDDIR)/nopsys.vmdk -m 512 -enable-kvm
 
 
 try-qemudbg: try-qemudbg-$(STORAGE)
 
 try-qemudbg-iso: $(BLDDIR)/nopsys.iso $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
-	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 512 &
+	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 512 -enable-kvm &
 	sleep 6
 	cd build && $(GDB) nopsys.kernel -x qemudbg
 
 try-qemudbg-hd: $(BLDDIR)/nopsys.vmdk $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
-	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -hda nopsys.vmdk -m 512 &
+	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -hda nopsys.vmdk -m 512 -enable-kvm &
 	sleep 14
 	cd build && $(GDB) nopsys.kernel -x qemudbg
 

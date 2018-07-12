@@ -61,20 +61,30 @@ $(DESTFILES): $(EXTRAFILES)
 
 #vpath $(EXTRADIRS)
 
-$(BLDDIR)/disk: $(BLDDIR)/nopsys.kernel boot/grub.cfg $(DESTFILES)
-	cp -r boot/grub.cfg $(DISKDIR)/boot/grub/
+$(DISKDIR): $(BLDDIR)/nopsys.kernel boot/grub.cfg $(DESTFILES)
 	cp $(BLDDIR)/nopsys.kernel $(DISKDIR)/
 	touch $(DISKDIR) # nopsys.iso doesn't rebuild without this, why?
 	
 # make an iso (CD image)
-$(BLDDIR)/nopsys.iso: $(BLDDIR)/disk
+$(BLDDIR)/nopsys.iso: $(DISKDIR)
+	mkdir -p $(DISKDIR)/boot/grub
+	cp boot/grub.cfg $(DISKDIR)/boot/grub
 	$(MKRESCUE) --xorriso=$(XORRISO_DIR)xorriso -o $(BLDDIR)/nopsys.iso $(DISKDIR)
 	#mkisofs -J -hide-rr-moved -joliet-long -l -r -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -o $@ $(ISODIR)
 
+MODULES=biosdisk normal part_msdos fat iso9660 hfs ls multiboot search help
+
 # make a hard-disk image file
-$(BLDDIR)/nopsys.vmdk: $(BLDDIR)/disk
-	bash -x ./scripts/create-fat32.sh 200 $(BLDDIR)/disk $(BLDDIR)/nopsys.raw
-	sudo bash -x ./scripts/install-grub.sh $(BLDDIR)/nopsys.raw $(BLDDIR)/mount
+$(BLDDIR)/nopsys.vmdk: $(DISKDIR)	
+	bash ./scripts/create-fat32.sh 200 $(DISKDIR) $(BLDDIR)/nopsys.raw
+	
+	# copy first sector without overwriting the MBR
+	dd conv=notrunc if=/usr/lib/grub/i386-pc/boot.img of=$(BLDDIR)/nopsys.raw bs=1 count=446	
+	
+	# build and copy the rest of grub bootloader
+	grub-mkimage -c boot/grub.cfg --format=i386-pc -p "" $(MODULES) >$(BLDDIR)/boot-image.raw
+	dd conv=notrunc if=$(BLDDIR)/boot-image.raw of=$(BLDDIR)/nopsys.raw bs=512 seek=1
+	
 	qemu-img convert -f raw $(BLDDIR)/nopsys.raw -O vmdk $(BLDDIR)/nopsys.vmdk
 
 
@@ -102,8 +112,8 @@ $(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
 	chmod +x $@
 	echo 'ide0:0.fileName = nopsys.vmdk' >> $@
 
-$(BLDDIR)/bochsrc : boot/bochsrc
-	cp boot/bochsrc boot/bochsdbg $(BLDDIR)/
+$(BLDDIR)/bochsrc : boot/bochsrc boot/bochsrc-hd
+	cp boot/bochsrc boot/bochsrc-hd boot/bochsdbg $(BLDDIR)/
 
 $(BLDDIR)/qemudbg: boot/qemudbg
 	cp boot/qemudbg $(BLDDIR)/	
@@ -127,6 +137,9 @@ try-virtualbox-hd: $(BLDDIR)/nopsys.vmdk
 
 try-bochs: $(BLDDIR)/nopsys.iso $(BLDDIR)/bochsrc
 	cd build && bochs -q -rc bochsdbg
+
+try-bochs-hd: $(BLDDIR)/nopsys.vmdk $(BLDDIR)/bochsrc
+	cd build && bochs -f bochsrc-hd -q
 
 
 try-qemu: try-qemu-$(STORAGE)

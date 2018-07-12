@@ -74,16 +74,7 @@ $(BLDDIR)/nopsys.iso: $(BLDDIR)/disk
 # make a hard-disk image file
 $(BLDDIR)/nopsys.vmdk: $(BLDDIR)/disk
 	bash -x ./scripts/create-fat32.sh 200 $(BLDDIR)/disk $(BLDDIR)/nopsys.raw
-	export LOOP_DEVICE1=`sudo losetup -f` &&\
-	sudo losetup $$LOOP_DEVICE1 $(BLDDIR)/nopsys.raw &&\
-	export LOOP_DEVICE2=`sudo losetup -f` &&\
-	export OFFSET=`parted $(BLDDIR)/nopsys.raw unit b print | tail -2 | head -1 | cut -f 1 --delimit="B" | cut -c 9-` &&\
-	sudo losetup $$LOOP_DEVICE2 $(BLDDIR)/nopsys.raw -o $$OFFSET &&\
-	sudo mount -t vfat $$LOOP_DEVICE2 $(BLDDIR)/mount/ &&\
-	sudo grub-install --target=i386-pc --no-floppy --boot-directory=$(BLDDIR)/mount/boot/ --modules="normal part_msdos fat multiboot" $$LOOP_DEVICE1 &&\
-	sudo umount $(BLDDIR)/mount &&\
-	sudo losetup -d $$LOOP_DEVICE2 &&\
-	sudo losetup -d $$LOOP_DEVICE1
+	sudo bash -x ./scripts/install-grub.sh $(BLDDIR)/nopsys.raw $(BLDDIR)/mount
 	qemu-img convert -f raw $(BLDDIR)/nopsys.raw -O vmdk $(BLDDIR)/nopsys.vmdk
 
 

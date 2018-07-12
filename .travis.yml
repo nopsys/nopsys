@@ -8,3 +8,5 @@ before_install:
 before_script: cp compilation.conf.example compilation.conf
 
 script: make
+  - sudo: enabled
+

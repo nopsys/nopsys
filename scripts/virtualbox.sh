@@ -11,7 +11,7 @@ SCRIPT_PATH=`dirname $0`;
 # - one SATA hard disk                                                #
 # - one IDE DVD player                                                #
 #                                                                     #
-# Edit the VM settings below to your neccesity                        #
+# Edit the VM settings below to your needs                            #
 #                                                                     #
 #######################################################################
 
@@ -41,11 +41,11 @@ if [ -z "$RESULT" ]
 then
 	VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register
 	VBoxManage modifyvm $VMNAME --memory $MEMORY
+	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
+	
 	"Enable serial port"
 	VBoxManage modifyvm $VMNAME --uart1 0x3F8 4
-	FILENAME=$(pwd)/../../../Performance/resultsFromCogNOS.txt
-	VBoxManage modifyvm $VMNAME --uartmode1 file $FILENAME
-	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
+	VBoxManage modifyvm $VMNAME --uartmode1 file serial-output.txt	
 fi
 
 if [ $STORAGE = "iso" ]; then

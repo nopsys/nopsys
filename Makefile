@@ -107,13 +107,13 @@ $(VM_BUILDDIR)/vm.obj:
 # system vm generation
 #----------------------------------
 
-$(BLDDIR)/vmware.cd.vmx: boot/vmx.template
+$(BLDDIR)/vmware.cd.vmx: boot/vmx.template  $(BLDDIR)
 	cp boot/vmx.template $@
 	chmod +x $@
 	echo 'ide0:0.fileName = nopsys.iso' >> $@
 	echo 'ide0:0.deviceType = "cdrom-image"' >> $@
 
-$(BLDDIR)/vmware.hd.vmx: boot/vmx.template
+$(BLDDIR)/vmware.hd.vmx: boot/vmx.template $(BLDDIR)
 	cp boot/vmx.template $@
 	chmod +x $@
 	echo 'ide0:0.fileName = nopsys.vmdk' >> $@

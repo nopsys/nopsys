@@ -107,10 +107,17 @@ $(VM_BUILDDIR)/vm.obj:
 # system vm generation
 #----------------------------------
 
-$(BLDDIR)/vmware.cd.vmx: boot/vmx.cd.template
-	cp boot/vmx.cd.template $@
+$(BLDDIR)/vmware.cd.vmx: boot/vmx.template
+	cp boot/vmx.template $@
+	chmod +x $@
+	echo 'ide0:0.fileName = nopsys.iso' >> $@
+	echo 'ide0:0.deviceType = "cdrom-image"' >> $@
+
+$(BLDDIR)/vmware.hd.vmx: boot/vmx.template
+	cp boot/vmx.template $@
 	chmod +x $@
 	echo 'ide0:0.fileName = nopsys.vmdk' >> $@
+
 
 $(BLDDIR)/bochsrc : boot/bochsrc boot/bochsrc-hd
 	cp boot/bochsrc boot/bochsrc-hd boot/bochsdbg $(BLDDIR)/
@@ -121,11 +128,15 @@ $(BLDDIR)/qemudbg: boot/qemudbg
 #----------------------------------
 # system vm running 
 #----------------------------------
+try-vmware: try-vmware-$(STORAGE)
 
-try-vmware: $(BLDDIR)/vmware.cd.vmx $(BLDDIR)/nopsys.iso 
+try-vmware-iso: $(BLDDIR)/vmware.cd.vmx $(BLDDIR)/nopsys.iso 
 	vmplayer $<
 #	vmware-server-console -m -x -l "`pwd`/$<"
 #	make clean
+
+try-vmware-hd: $(BLDDIR)/vmware.hd.vmx $(BLDDIR)/nopsys.vmdk
+	vmplayer $<
 
 try-virtualbox: try-virtualbox-$(STORAGE)
 

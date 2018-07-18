@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 SCRIPT_PATH=`dirname $0`;
 #######################################################################
@@ -15,13 +15,27 @@ SCRIPT_PATH=`dirname $0`;
 #                                                                     #
 #######################################################################
 
-## The VM name and type
-STORAGE=iso
-if [ ! -z "$1" ]; then
-	STORAGE=$1
+if [ -z "$1" ]; 
+then
+	echo "The first arguments to this scripts must be the filename of the ISO or VMDK with the nopsys installation"
+	exit 1
+else
+	FILE="$1"
 fi
 
-RELEASE=${RELEASE:-debug}
+STORAGE="${FILE##*.}"
+
+if [[ ! "$STORAGE" = "vmdk" &&  ! "$STORAGE" = "iso" ]]; 
+then
+	echo "The first arguments to this scripts must be the filename of the ISO or VMDK with the nopsys installation"
+	exit 1
+fi 
+
+IN_DEV=`[ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1 || echo "false"`
+if [ ! $IN_DEV = "false" ]
+then
+	RELEASE="debug"
+fi
 
 VMNAME="CogNOS"-$STORAGE-$RELEASE
 OSTYPE="Other_64"
@@ -33,7 +47,7 @@ if [ $RELEASE = "debug" ]; then
 	RUN_PATH=$SCRIPT_PATH/../build/
 	echo path is $RUN_PATH
 else
-    RUN_PATH=.
+    RUN_PATH="bundles/"
 fi
 
 RESULT=`vboxmanage list vms | grep $VMNAME`
@@ -41,11 +55,10 @@ if [ -z "$RESULT" ]
 then
 	VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register
 	VBoxManage modifyvm $VMNAME --memory $MEMORY
-	"Enable serial port"
-	VBoxManage modifyvm $VMNAME --uart1 0x3F8 4
-	FILENAME=$(pwd)/../../../Performance/resultsFromCogNOS.txt
-	VBoxManage modifyvm $VMNAME --uartmode1 file $FILENAME
 	VBoxManage storagectl $VMNAME --name "IDE Controller" --add ide
+	# Enable Serial Port
+	VBoxManage modifyvm $VMNAME --uart1 0x3F8 4
+	VBoxManage modifyvm $VMNAME --uartmode1 file "$(pwd)/serial-output.txt"
 fi
 
 if [ $STORAGE = "iso" ]; then

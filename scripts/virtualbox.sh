@@ -1,6 +1,11 @@
 #!/bin/bash
 
-SCRIPT_PATH=`dirname $0`;
+SCRIPT_PATH="$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )"
+if [ ! -d $SCRIPT_PATH ]; then
+    echo "Could not determine absolute dir of $0"
+    echo "Maybe accessed with symlink"
+fi
+
 #######################################################################
 #                                                                     #
 # Create Virtualbox VM for running a Nopsys OS                        #
@@ -32,23 +37,19 @@ then
 fi 
 
 IN_DEV=`[ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1 || echo "false"`
-if [ ! $IN_DEV = "false" ]
+if [ ! "$IN_DEV" = "false" ]
 then
-	RELEASE="debug"
+	VMNAME="CogNOS-$STORAGE-debug"
+    RUN_PATH=$SCRIPT_PATH/../build/
+else
+	VMNAME="CogNOS-$STORAGE"
+    RUN_PATH="bundles/"
 fi
 
-VMNAME="CogNOS"-$STORAGE-$RELEASE
 OSTYPE="Other_64"
 ISOFILE="nopsys.iso"
 HDFILE="nopsys.vmdk"
 MEMORY=1024
-
-if [ $RELEASE = "debug" ]; then
-	RUN_PATH=$SCRIPT_PATH/../build/
-	echo path is $RUN_PATH
-else
-    RUN_PATH="bundles/"
-fi
 
 RESULT=`vboxmanage list vms | grep $VMNAME`
 if [ -z "$RESULT" ]
@@ -62,7 +63,7 @@ then
 fi
 
 if [ $STORAGE = "iso" ]; then
-	VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $RUN_PATH/$ISOFILE
+	VBoxManage storageattach "$VMNAME" --storagectl "IDE Controller" --port 0 --device 0 --type dvddrive --medium $RUN_PATH/$ISOFILE
 else
 	VBoxManage storageattach $VMNAME --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium $RUN_PATH/$HDFILE
 	ABSOLUTE_PATH="$(cd $(dirname $RUN_PATH/$HDFILE); pwd)/$(basename $RUN_PATH/$HDFILE)"
@@ -70,5 +71,5 @@ else
 	VBoxManage internalcommands sethduuid $RUN_PATH/$HDFILE $UUID
 fi
 
-vboxmanage startvm $VMNAME
+vboxmanage startvm "$VMNAME"
 

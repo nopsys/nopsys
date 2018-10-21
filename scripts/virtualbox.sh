@@ -51,7 +51,7 @@ ISOFILE="nopsys.iso"
 HDFILE="nopsys.vmdk"
 MEMORY=1024
 
-RESULT=`vboxmanage list vms | grep $VMNAME`
+RESULT=`vboxmanage list vms | grep $VMNAME\"`
 if [ -z "$RESULT" ]
 then
 	VBoxManage createvm --name $VMNAME --ostype $OSTYPE --register

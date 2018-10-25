@@ -156,9 +156,11 @@ try-bochs-hd: $(BLDDIR)/nopsys.vmdk $(BLDDIR)/bochsrc
 try-qemu: try-qemu-$(STORAGE)
 
 try-qemu-iso: $(BLDDIR)/nopsys.iso
+	#kvm not supported in mac
 	qemu-system-x86_64 -boot d -cdrom $(BLDDIR)/nopsys.iso -m 512 -enable-kvm -netdev user,id=user0 -device rtl8139,netdev=user0
 
 try-qemu-hd: $(BLDDIR)/nopsys.vmdk
+	#kvm not supported in mac
 	qemu-system-x86_64 -boot d -hda $(BLDDIR)/nopsys.vmdk -m 512 -enable-kvm -netdev user,id=user0 -device rtl8139,netdev=user0
 
 
@@ -166,12 +168,14 @@ try-qemudbg: try-qemudbg-$(STORAGE)
 
 try-qemudbg-iso: $(BLDDIR)/nopsys.iso $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
+	#kvm not supported in mac
 	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -cdrom nopsys.iso -m 512 -enable-kvm --netdev user,id=user0 -device rtl8139,netdev=user0 &
 	sleep 6
 	cd build && $(GDB) nopsys.kernel -x qemudbg
 
 try-qemudbg-hd: $(BLDDIR)/nopsys.vmdk $(BLDDIR)/qemudbg
 	# use setsid so that ctrl+c in gdb doesn't kill qemu
+	#kvm not supported in mac
 	cd $(BLDDIR) && $(SETSID) qemu-system-x86_64 -s -boot d -hda nopsys.vmdk -m 512 -enable-kvm --netdev user,id=user0 -device rtl8139,netdev=user0 &
 	sleep 14
 	cd build && $(GDB) nopsys.kernel -x qemudbg

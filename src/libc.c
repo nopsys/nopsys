@@ -13,7 +13,7 @@
 
 // For malloc and friends
 
-#define HEAP_SIZE               1024*1024*10
+#define HEAP_SIZE               1024*1024*100
 
 #define PAGESIZE 4096
 
@@ -81,7 +81,9 @@ void *realloc(void *ptr, size_t size)
     }
 
     printf("REALLOC %x size = %d #######################################\n", ptr, size);
-    return malloc(size);
+    void* new_ptr = malloc(size);
+	memcpy(new_ptr, ptr, size);
+	return malloc;
 }
 
 

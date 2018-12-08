@@ -15,7 +15,7 @@ Nopsys expects from the app to be run a very small API. At boot time, grub will 
 Nopsys provides an implementation of a small subset of libc. This is because typical runtimes (specially Cog) require access to the standard C library, and also to provide a minimum of help. We would like to move this libc out as a separate project in the future, letting nopsys be even smaller.
 
 ## Publications
-We are working on them. Nothing serious yet :). Hope to have news soon.
+- [Self-Contained Development Environments (DLS '18)](https://charig.github.io/assets/papers/SCDE-DLS.pdf)
 
 ## Code structure
 
